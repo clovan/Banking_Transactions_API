@@ -1,12 +1,17 @@
 name: Python Checks
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -20,4 +25,5 @@ jobs:
 
       - name: Run Tests
         run: |
+          # Cette commande cherche tous les fichiers test_*.py
           pytest
