@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "banking-transactions-api"
+version = "1.0.0"
+description = "API de gestion des transactions bancaires pour l'équipe commerciale"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    {name = "Clovis", email = "clovisleroukx@gmail.com"},
+    {name = "Irmeline", email = "mguevou@gmail.com"},
+    {name = "Milaine", email = "milainecabrelle@gmail.com"},
+    {name = "Amina", email = "a_salimimazrag@stu-mba-esg.com"},
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Framework :: FastAPI",
+    "Operating System :: OS Independent",
+]
+
+# Dépendances de production (Équivalent scope 'compile' Maven)
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "pydantic",
+    "python-dotenv",
+]
+
+# Dépendances de développement/test (Équivalent scope 'test' Maven)
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "ruff",
+    "httpx",
+]
+
+# Configuration de Pytest (Équivalent maven-surefire-plugin)
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+addopts = "-v --strict-markers"
+
+# Configuration de Ruff (Linter/Checkstyle)
+[tool.ruff]
+line-length = 88
+select = ["E", "F", "I"]
+
+[tool.ruff.format]
+quote-style = "double"
