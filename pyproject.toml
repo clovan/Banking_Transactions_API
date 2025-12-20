@@ -26,6 +26,7 @@ dependencies = [
     "uvicorn[standard]",
     "pydantic",
     "python-dotenv",
+    "spglib>=2.6.0",
 ]
 
 # Dépendances de développement/test (Équivalent scope 'test' Maven)
