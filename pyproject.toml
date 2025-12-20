@@ -25,6 +25,7 @@ dependencies = [
     "fastapi",
     "uvicorn[standard]",
     "pydantic",
+    "pandas",
     "python-dotenv",
     "spglib>=2.6.0",
 ]
