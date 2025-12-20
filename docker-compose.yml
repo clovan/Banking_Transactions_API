@@ -1,0 +1,13 @@
+services:
+  api:
+    build: .
+    container_name: banking_api_container
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app  # Synchronise ton dossier actuel avec le conteneur
+    environment:
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+    stdin_open: true
+    tty: true
