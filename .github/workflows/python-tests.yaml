@@ -21,20 +21,19 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          # On installe absolument tout pour éviter les erreurs d'import
+          # Installation de toutes les bibliothèques nécessaires pour FastAPI et les tests
           pip install pytest fastapi uvicorn pandas httpx
 
       - name: Prepare Workspace
-        # On recrée la structure de dossiers que Git ignore
+        # On recrée le dossier data et le fichier CSV factice pour éviter le FileNotFoundError
         run: |
           mkdir -p data
-          # On crée un CSV minimal avec les BONNES colonnes (use_chip et isFraud)
           echo "amount,use_chip,isFraud" > data/transactions_data.csv
           echo "$10.0,Swipe Transaction,0" >> data/transactions_data.csv
 
       - name: Run Tests
-        env:
-          # Indispensable pour que GitHub trouve ton dossier 'src'
-          PYTHONPATH: src
         run: |
+          # La ligne suivante ajoute le dossier racine au PYTHONPATH. 
+          # C'est ce qui permet à GitHub de trouver 'src'.
+          export PYTHONPATH=$PYTHONPATH:.
           pytest
