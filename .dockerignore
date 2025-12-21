@@ -1,0 +1,22 @@
+# Ne pas envoyer les données lourdes (on utilise les volumes à la place)
+data/
+
+# Ne pas envoyer les environnements virtuels
+.venv/
+venv/
+env/
+
+# Ne pas envoyer les fichiers de cache Python
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ne pas envoyer les dossiers Git
+.git/
+.gitignore
+
+# Ne pas envoyer les fichiers de configuration Docker eux-mêmes
+Dockerfile
+docker-compose.yml
+.dockerignore

@@ -2,7 +2,7 @@ name: Python Checks
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main, master, feature/* ]
   pull_request:
     branches: [ main, master ]
 
@@ -14,16 +14,26 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest fastapi uvicorn
+          # Installation de toutes les bibliothèques nécessaires pour FastAPI et les tests
+          pip install pytest fastapi uvicorn pandas httpx
+
+      - name: Prepare Workspace
+        # On recrée le dossier data et le fichier CSV factice pour éviter le FileNotFoundError
+        run: |
+          mkdir -p data
+          echo "amount,use_chip,isFraud" > data/transactions_data.csv
+          echo "$10.0,Swipe Transaction,0" >> data/transactions_data.csv
 
       - name: Run Tests
         run: |
-          # Cette commande cherche tous les fichiers test_*.py
+          # La ligne suivante ajoute le dossier racine au PYTHONPATH. 
+          # C'est ce qui permet à GitHub de trouver 'src'.
+          export PYTHONPATH=$PYTHONPATH:.
           pytest
