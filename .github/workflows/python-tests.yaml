@@ -21,12 +21,12 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          # Installation des bibliothèques nécessaires
+          # Installation des bibliothèques nécessaires pour le test
           pip install pytest fastapi uvicorn pandas httpx
 
       - name: Create dummy data for GitHub
-        # Cette étape crée un dossier data et un petit fichier CSV
-        # pour que ton code ne plante pas par manque de données.
+        # Cette étape est CRUCIALE : elle crée un faux fichier CSV
+        # pour que tes tests ne plantent pas sur GitHub.
         run: |
           mkdir -p data
           echo "amount,use_chip,isFraud" > data/transactions_data.csv
@@ -34,7 +34,7 @@ jobs:
 
       - name: Run Tests
         env:
-          # On définit le PYTHONPATH pour que GitHub trouve le dossier 'src'
+          # On définit le PYTHONPATH pour que GitHub sache où est ton code
           PYTHONPATH: src
         run: |
           pytest
