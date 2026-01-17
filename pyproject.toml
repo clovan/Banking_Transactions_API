@@ -29,17 +29,22 @@ dependencies = [
     "python-dotenv",
     "spglib>=2.6.0",
     "pandas-stubs==2.3.3.251219",
-    "pytest>=9.0.2",
 ]
 
 # Dépendances de développement/test (Équivalent scope 'test' Maven)
 [project.optional-dependencies]
 dev = [
-    "pytest",
+    "pytest>=9.0.2",
     "pytest-cov",
     "ruff",
     "httpx",
 ]
+
+# --- AJOUT CRUCIAL POUR TON ARCHITECTURE ---
+# Cette section garantit que 'routers' et 'services' sont inclus dans le .whl
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["banking_transaction_api*"]
 
 # Configuration de Pytest (Équivalent maven-surefire-plugin)
 [tool.pytest.ini_options]
