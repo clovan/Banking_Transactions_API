@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Query, HTTPException
-from src.banking_transaction_api.services.transaction_service import TransactionService
+from banking_transaction_api.services.transaction_service import TransactionService
 
 router = APIRouter(prefix="/api/transactions", tags=["Transactions"])
 service = TransactionService()

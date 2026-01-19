@@ -1,4 +1,4 @@
-from src.banking_transaction_api.data_loader import load_dataset
+from banking_transaction_api.data_loader import load_dataset
 import pandas as pd
 
 class TransactionService:

@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from src.banking_transaction_api.routers.transactions import router as trans_router
+from banking_transaction_api.routers.transactions import router as trans_router
 
 app = FastAPI(title="Banking API")
 
