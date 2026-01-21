@@ -2,6 +2,10 @@
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.packages.find]
+where = ["src"]
+
+
 [project]
 name = "banking-transactions-api"
 version = "1.0.0"
