@@ -49,3 +49,8 @@ class TransactionService:
         initial_len = len(df)
         self._df = df[df["id"].astype(str) != str(transaction_id)]
         return len(self._df) < initial_len
+    
+    # DOIT ÊTRE ALIGNÉ ICI (DANS LA CLASSE)
+    def is_dataset_loaded(self):
+        """Vérifie si le DataFrame a été initialisé."""
+        return self._df is not None
