@@ -84,3 +84,4 @@ class DataLoader:
     @property
     def fraud_labels(self) -> Dict:
         return self._data.get("fraud_labels")
+    
