@@ -1,8 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from typing import Dict, Any, List
-# Updated import path to match your folder structure:
-# src -> banking_transaction_api -> services
-from banking_transaction_api.services.customers_service import CustomersService
+from src.banking_transaction_api.services.customers_service import CustomersService
 
 router = APIRouter(prefix="/api/customers", tags=["Customers"])
 service = CustomersService()

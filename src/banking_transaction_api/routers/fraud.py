@@ -1,15 +1,12 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 from typing import Dict, Any, List, Optional
-
-# Import adjustment based on your folder structure:
-# From the services package, we import the class from the fraud_service.py file
-from banking_transaction_api.services.fraud_service import FraudService
+from src.banking_transaction_api.services.fraud_service import FraudDetectionService
 
 router = APIRouter(prefix="/api/fraud", tags=["Fraud"])
 
 # Instantiate the service (ensure the class is named FraudService)
-service = FraudService()
+service = FraudDetectionService()
 
 class FraudPredictionRequest(BaseModel):
     """

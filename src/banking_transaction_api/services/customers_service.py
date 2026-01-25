@@ -1,8 +1,6 @@
 import pandas as pd
 from typing import Dict, Any, List, Optional
-# Corrected import based on your VS Code explorer:
-# data_loader.py is inside banking_transaction_api, not in a utils folder.
-from banking_transaction_api.data_loader import DataLoader
+from src.banking_transaction_api.data_loader import DataLoader
 
 
 class CustomersService:

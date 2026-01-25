@@ -1,21 +1,17 @@
-from src.banking_transaction_api.data_loader import load_dataset
+from src.banking_transaction_api.data_loader import DataLoader
 import pandas as pd
 
 class TransactionService:
     def __init__(self):
-        self._df = None
+        self.data_loader = DataLoader()
+        
 
     def get_all(self):
-        if self._df is None:
-            self._df = load_dataset("transactions_data.csv")
-            # Pré-nettoyage des montants dès le chargement
-            if not self._df.empty and "amount" in self._df.columns:
-                # On enlève le "$" et on convertit en nombre
-                self._df["amount"] = self._df["amount"].replace(r'[\$,]', '', regex=True).astype(float)
-        return self._df
+        return self.data_loader.transactions
 
     def filter_transactions(self, df, transaction_type=None, is_fraud=None, min_amount=None, max_amount=None):
         if df.empty:
+            print("DataFrame is empty, returning as is.")
             return df
 
         filtered_df = df.copy()

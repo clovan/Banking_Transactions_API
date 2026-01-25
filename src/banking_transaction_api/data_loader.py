@@ -18,8 +18,7 @@ class DataLoader:
         return cls._instance
 
     def _load_data(self):
-        # Define the base path for the data folder relative to this script
-        # Structure: src/banking_transaction_api/data_loader.py -> ../../data
+     
         base_path = Path(__file__).resolve().parent.parent.parent / "data"
         
         # Load CSV files (Matches the files seen in your explorer)
