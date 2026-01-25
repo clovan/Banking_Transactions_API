@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 from typing import Dict, Any, List, Optional
-from src.banking_transaction_api.services.fraud_service import FraudDetectionService
+from banking_transaction_api.services.fraud_service import FraudDetectionService
 
 router = APIRouter(prefix="/api/fraud", tags=["Fraud"])
 

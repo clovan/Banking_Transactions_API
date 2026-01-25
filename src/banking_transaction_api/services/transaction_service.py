@@ -1,4 +1,4 @@
-from src.banking_transaction_api.data_loader import DataLoader
+from banking_transaction_api.data_loader import DataLoader
 import pandas as pd
 
 class TransactionService:

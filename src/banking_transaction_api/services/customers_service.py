@@ -1,6 +1,6 @@
 import pandas as pd
 from typing import Dict, Any, List, Optional
-from src.banking_transaction_api.data_loader import DataLoader
+from banking_transaction_api.data_loader import DataLoader
 
 
 class CustomersService:

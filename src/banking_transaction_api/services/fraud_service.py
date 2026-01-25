@@ -1,7 +1,7 @@
 import pandas as pd
 from typing import Dict, Any, List
 # Ajustamos el import según tu estructura en el VS Code
-from src.banking_transaction_api.data_loader import DataLoader
+from banking_transaction_api.data_loader import DataLoader
 
 class FraudDetectionService:
     """Service for fraud detection and analysis."""
