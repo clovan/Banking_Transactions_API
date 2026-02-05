@@ -52,8 +52,6 @@ def delete_transaction(transaction_id: int):
 def get_customer_debits(customer_id: int):
     """Liste les transactions sortantes (montant < 0)."""
     results = service.get_customer_flow(customer_id, flow_type="debit")
-    if not results:
-        raise HTTPException(status_code=404, detail="Aucun débit trouvé pour ce client")
     return {"customer_id": customer_id, "type": "debit/origine", "transactions": results}
 
 # =================================================================
@@ -63,7 +61,4 @@ def get_customer_debits(customer_id: int):
 def get_customer_credits(customer_id: int):
     """Liste les transactions reçues (montant > 0)."""
     results = service.get_customer_flow(customer_id, flow_type="credit")
-    if not results:
-        raise HTTPException(status_code=404, detail="Aucun crédit trouvé pour ce client")
     return {"customer_id": customer_id, "type": "credit/destination", "transactions": results}
-
