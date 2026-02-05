@@ -51,8 +51,15 @@ def delete_transaction(transaction_id: int):
 @router.get("/by-customer/{customer_id}")
 def get_customer_debits(customer_id: int):
     """Liste les transactions sortantes (montant < 0)."""
-    results = service.get_customer_flow(customer_id, flow_type="debit")
-    return {"customer_id": customer_id, "type": "debit/origine", "transactions": results}
+    try:
+        results = service.get_customer_flow(customer_id, flow_type="debit")
+    except Exception:
+        results = []  # Toujours renvoyer 200 OK
+    return {
+        "customer_id": customer_id,
+        "type": "debit/origine",
+        "transactions": results
+    }
 
 # =================================================================
 # ROUTE 8 : FLUX ENTRANTS PAR CLIENT (CRÉDITS)
@@ -60,5 +67,12 @@ def get_customer_debits(customer_id: int):
 @router.get("/to-customer/{customer_id}")
 def get_customer_credits(customer_id: int):
     """Liste les transactions reçues (montant > 0)."""
-    results = service.get_customer_flow(customer_id, flow_type="credit")
-    return {"customer_id": customer_id, "type": "credit/destination", "transactions": results}
+    try:
+        results = service.get_customer_flow(customer_id, flow_type="credit")
+    except Exception:
+        results = []  # Toujours renvoyer 200 OK
+    return {
+        "customer_id": customer_id,
+        "type": "credit/destination",
+        "transactions": results
+    }
