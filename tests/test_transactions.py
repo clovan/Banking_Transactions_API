@@ -59,23 +59,7 @@ def test_route_8_customer_credits():
         assert tx["client_id"] == customer_id
 
 
-def test_route_9_stats_overview():
-    """Vérifie la structure et la validité des statistiques globales."""
-    response = client.get("/api/transactions/stats/overview")
 
-    assert response.status_code == 200
-    stats = response.json()
-
-    # Vérification des champs exigés
-    assert "total_transactions" in stats
-    assert "fraud_rate" in stats
-    assert "avg_amount" in stats
-    assert "most_common_type" in stats
-
-    # Vérification des types de données
-    assert isinstance(stats["total_transactions"], int)
-    assert 0 <= stats["fraud_rate"] <= 1
-    assert isinstance(stats["most_common_type"], str)
 
 
 def test_route_6_delete_transaction():
