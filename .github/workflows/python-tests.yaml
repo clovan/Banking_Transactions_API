@@ -25,14 +25,18 @@ jobs:
           pip install pytest fastapi uvicorn pandas httpx
 
       - name: Prepare Workspace
-        # On recrée l'environnement de données pour les tests
+        # On crée un fichier CSV avec des données permettant de tester les débits et crédits
         run: |
           mkdir -p data
-          echo "amount,use_chip,isFraud" > data/transactions_data.csv
-          echo "10.0,Swipe Transaction,0" >> data/transactions_data.csv
+          # Ajout des colonnes nécessaires pour les filtres par client (Route 7 et 8)
+          echo "amount,use_chip,isFraud,nameOrig,nameDest" > data/transactions_data.csv
+          # Une transaction négative pour le test de débit (Route 7)
+          echo "-50.0,Swipe Transaction,0,123,456" >> data/transactions_data.csv
+          # Une transaction positive pour le test de crédit (Route 8)
+          echo "100.0,Chip Transaction,0,789,123" >> data/transactions_data.csv
 
       - name: Run Tests
-        # CORRECTION CRUCIALE : On pointe vers 'src' pour trouver le code
+        # On pointe vers 'src' pour que Python trouve ton code
         env:
           PYTHONPATH: src
         run: |
