@@ -8,6 +8,8 @@ app = FastAPI(title="Banking API")
 app.include_router(customers_router)
 app.include_router(fraud_router)
 
+app.include_router(trans_router)
+
 @app.get("/")
 def health_check():
     return {"status": "online"}
