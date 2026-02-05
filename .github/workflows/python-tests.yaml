@@ -21,19 +21,19 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          # Installation des dépendances nécessaires pour FastAPI, Pandas et les tests
+          # Installation des bibliothèques nécessaires
           pip install pytest fastapi uvicorn pandas httpx
 
       - name: Prepare Workspace
-        # On recrée le dossier data et le fichier CSV factice pour éviter le FileNotFoundError
+        # On recrée l'environnement de données pour les tests
         run: |
           mkdir -p data
           echo "amount,use_chip,isFraud" > data/transactions_data.csv
           echo "10.0,Swipe Transaction,0" >> data/transactions_data.csv
 
       - name: Run Tests
-        # L'ajout de env permet à pytest de trouver le package 'banking_transaction_api'
+        # CORRECTION CRUCIALE : On pointe vers 'src' pour trouver le code
         env:
-          PYTHONPATH: .
+          PYTHONPATH: src
         run: |
           pytest
