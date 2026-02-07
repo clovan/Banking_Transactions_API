@@ -3,7 +3,7 @@ import json
 import os
 import numpy as np
 
-def load_full_dataset(nrows: int = 10000):
+def load_full_dataset(nrows: int = 50000):
     """
     Charge le CSV, nettoie les montants et fusionne avec les labels de fraude.
     """

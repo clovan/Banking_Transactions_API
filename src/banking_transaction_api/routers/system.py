@@ -1,15 +1,13 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from banking_transaction_api.services.system_service import SystemService
-from banking_transaction_api.services.transaction_service import TransactionService
 
 router = APIRouter(prefix="/api/system", tags=["System"])
 system_service = SystemService()
-trans_service = TransactionService()
 
 @router.get("/health")
-def health():
-    # On vérifie l'état via les deux services
-    is_loaded = trans_service.is_dataset_loaded() # <--- Attention aux parenthèses ()
+def health(request: Request):
+    # Utilise l'instance partagée depuis app.state
+    is_loaded = request.app.state.transaction_service.is_dataset_loaded()
     return system_service.get_status(is_loaded)
 
 @router.get("/metadata")
