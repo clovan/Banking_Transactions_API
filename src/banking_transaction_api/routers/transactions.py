@@ -44,7 +44,7 @@ def get_transaction_by_id(id: int):
         raise HTTPException(status_code=404, detail=f"Aucune transaction trouvée avec l'identifiant {id}")
     return transaction
 
-
+"""Création de la route POST /api/transactions/search"""
 @router.post("/search")
 def search_transactions(
     transaction_type: str = Query(None),
@@ -66,8 +66,6 @@ def search_transactions(
         "total_results": len(df_filtered),
         "transactions": df_filtered.to_dict(orient="records")
     }
-
-"""Création de la route POST /api/transactions/search"""
 
 """Création de la route GET /api/transactions/types"""
 @router.get("/types")
