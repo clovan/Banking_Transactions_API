@@ -20,7 +20,7 @@ def load_full_dataset():
         return df
 
     # Limite mémoire
-    df = pd.read_csv(csv_path, nrows=10000)
+    df = pd.read_csv(csv_path, nrows=5000)
 
     # Normalisation colonnes
     df.columns = df.columns.str.strip().str.lower()
