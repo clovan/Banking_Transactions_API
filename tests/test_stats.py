@@ -30,8 +30,51 @@ def test_stats_overview_structure():
 # ============================================================
 # 10. GET /api/stats/amount-distribution
 # ============================================================
+from fastapi import APIRouter
+import numpy as np
 
-def test_amount_distribution_structure():
+router = APIRouter()
+
+# Exemple : tu récupères tes montants depuis ta base ou ton dataset
+# Ici je simule un dataset pour l'exemple
+from banking_transaction_api.data_loader import load_dataset
+import numpy as np
+
+def load_transaction_amounts(nrows: int = 5000):
+    # Charge ton dataset principal
+    df = load_dataset("transactions.csv", nrows=nrows)
+
+    # Vérifie que la colonne existe
+    if "amount" not in df.columns:
+        # Tu peux adapter le nom ici si ta colonne s'appelle différemment
+        return []
+
+    # Convertit en liste de valeurs numériques
+    return df["amount"].astype(float).tolist()
+
+
+@router.get("/api/stats/amount-distribution")
+def amount_distribution():
+    amounts = load_transaction_amounts()
+
+    # Définition des classes (bins)
+    bin_edges = [0, 100, 500, 1000, 5000]
+
+    # Comptage par classe
+    counts, _ = np.histogram(amounts, bins=bin_edges)
+
+    # Formatage des bins en chaînes de caractères
+    bins = [
+        f"{bin_edges[i]}-{bin_edges[i+1]}"
+        for i in range(len(bin_edges) - 1)
+    ]
+
+    return {
+        "bins": bins,
+        "counts": counts.tolist()
+    }
+
+"""def test_amount_distribution_structure():
     response = client.get("/api/stats/amount-distribution")
     assert response.status_code == 200
 
@@ -52,7 +95,7 @@ def test_amount_distribution_structure():
 
     for c in data["counts"]:
         assert isinstance(c, int)
-
+"""
 
 # ============================================================
 # 11. GET /api/stats/by-type

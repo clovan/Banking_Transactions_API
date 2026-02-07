@@ -1,9 +1,7 @@
 from banking_transaction_api.data_loader import load_dataset, load_fraud_labels_dict
-
-import pandas as pd
-from pydantic import BaseModel
-from typing import Optional, List
-
+#from pydantic import BaseModel
+#from typing import Optional, List
+#import pandas as pd
 
 class TransactionService:
     def __init__(self):
@@ -13,55 +11,56 @@ class TransactionService:
     def get_all(self):
         if self._df is None:
             self._df = load_dataset("transactions_data.csv")
-            if not self._df.empty and "amount" in self._df.columns:
-                self._df["amount"] = self._df["amount"].replace(r'[\$,]', '', regex=True).astype(float)
+
+            if not self._df.empty:
+
+                # Nettoyage du montant (gère $-77.00 sans planter)
+                if "amount" in self._df.columns:
+                    self._df["amount"] = (
+                        self._df["amount"]
+                        .astype(str)
+                        .str.replace(r'[\$,]', '', regex=True)
+                        .str.replace('(', '-', regex=False)
+                        .str.replace(')', '', regex=False)
+                        .astype(float)
+                    )
+
+                # Ajout de isFraud depuis le JSON
+                if "id" in self._df.columns:
+                    self._df["isFraud"] = self._df["id"].apply(
+                        lambda tx_id: self._fraud_dict.get(int(tx_id), 0)
+                    )
+
+                # Création de la colonne type = use_chip
+                if "use_chip" in self._df.columns:
+                    self._df["transaction_type"] = self._df["use_chip"]
+                else:
+                    self._df["transaction_type"] = None
+
         return self._df
 
-    def filter_transactions(self, df, transaction_type=None, is_fraud=None, min_amount=None, max_amount=None):
-        if df.empty:
-            return df
+    def filter_transactions(self, df, transaction_type=None, isFraud=None, min_amount=None, max_amount=None):
 
-        filtered_df = df.copy()
+        df_filtered = df.copy()
 
-        # -----------------------------
-        # 1. Nettoyage du montant
-        # -----------------------------
-        if "amount" not in filtered_df.columns:
-            raise HTTPException(status_code=500, detail="Colonne 'amount' absente du dataset")
+        # Filtre type (équivalent use_chip)
+        if transaction_type and "transaction_type" in df_filtered.columns:
+            df_filtered["transaction_type"] = df_filtered["transaction_type"].astype(str).str.upper()
+            df_filtered = df_filtered[df_filtered["transaction_type"] == type.upper()]
 
-        # Nettoyage systématique (évite les erreurs si df est déjà en cache)
-        filtered_df["amount"] = (
-            filtered_df["amount"]
-            .replace(r'[\$,]', '', regex=True)
-            .astype(float)
-        )
+        # Filtre isFraud
+        if isFraud is not None and "isFraud" in df_filtered.columns:
+            df_filtered = df_filtered[df_filtered["isFraud"] == isFraud]
 
-        # -----------------------------
-        # 2. Filtrage par type
-        # -----------------------------
-        col_type = "use_chip" if "use_chip" in filtered_df.columns else "type"
-
-        if transaction_type and col_type in filtered_df.columns:
-            filtered_df = filtered_df[filtered_df[col_type] == transaction_type]
-
-        # -----------------------------
-        # 3. Filtrage par fraude via JSON
-        # -----------------------------
-        if is_fraud is not None:
-            filtered_df = filtered_df[
-                filtered_df["id"].apply(lambda tx_id: self._fraud_dict.get(int(tx_id), 0) == is_fraud)
-            ]
-
-        # -----------------------------
-        # 4. Filtrage par montant
-        # -----------------------------
+        # Filtre montant min
         if min_amount is not None:
-            filtered_df = filtered_df[filtered_df["amount"] >= float(min_amount)]
+            df_filtered = df_filtered[df_filtered["amount"] >= min_amount]
 
+        # Filtre montant max
         if max_amount is not None:
-            filtered_df = filtered_df[filtered_df["amount"] <= float(max_amount)]
+            df_filtered = df_filtered[df_filtered["amount"] <= max_amount]
 
-        return filtered_df
+        return df_filtered
 
     def get_transaction_by_id(self, id: int):
         df = self.get_all()
@@ -85,8 +84,4 @@ class TransactionService:
         return df[col_type].dropna().unique().tolist()
 
 
-class TransactionSearch(BaseModel):
-    type: Optional[str] = None
-    isFraud: Optional[int] = None
-    amount_range: Optional[List[float]] = None
 

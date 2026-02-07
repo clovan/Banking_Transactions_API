@@ -2,8 +2,12 @@ import pandas as pd
 from banking_transaction_api.services.transactions_service import TransactionService
 
 class StatistiquesService:
-    def __init__(self):
-        self.transaction_service = TransactionService()
+    """def __init__(self):
+        self.transaction_service = TransactionService()"""
+
+
+    def __init__(self, transaction_service):
+        self.transaction_service = transaction_service
 
     def get_overview_stats(self):
         df = self.transaction_service.get_all()
@@ -57,6 +61,31 @@ class StatistiquesService:
         if df.empty:
             return {"bins": [], "counts": []}
 
+        df["amount"] = (
+            df["amount"]
+            .replace(r'[\$,]', '', regex=True)
+            .astype(float)
+        )
+
+        # Bins dynamiques incluant les montants > 5000
+        bins = [0, 100, 500, 1000, 5000, float("inf")]
+        labels = ["0-100", "100-500", "500-1000", "1000-5000", "5000+"]
+
+        df["bin"] = pd.cut(df["amount"], bins=bins, labels=labels, right=False)
+
+        counts = df["bin"].value_counts().sort_index().tolist()
+
+        return {
+            "bins": labels,
+            "counts": counts
+        }
+
+    """def get_amount_distribution(self):
+        df = self.transaction_service.get_all()
+
+        if df.empty:
+            return {"bins": [], "counts": []}
+
         # Nettoyage montant
         df["amount"] = (
             df["amount"]
@@ -75,7 +104,7 @@ class StatistiquesService:
             "bins": labels,
             "counts": counts
         }
-
+"""
     def get_stats_by_type(self):
         df = self.transaction_service.get_all()
 

@@ -22,3 +22,11 @@ def load_fraud_labels_dict(json_path: str) -> dict:
 
     # Convertir Yes/No en 1/0
     return {int(tx_id): 1 if label == "Yes" else 0 for tx_id, label in labels.items()}
+
+def load_card_data(file_name: str = "cards_data.csv"):
+    path = os.path.join("data", file_name)
+    if os.path.exists(path):
+        df = pd.read_csv(path)
+        return df.fillna(0)
+    return pd.DataFrame()
+
