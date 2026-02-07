@@ -19,7 +19,7 @@ def list_transactions(
 ):
     """Consultation et filtrage global (inclut le statut de fraude)."""
     df = service.get_all()
-    if df.empty:
+    if df is None or df.empty:
         raise HTTPException(status_code=404, detail="Fichier de données vide")
 
     df_filtered = service.filter_transactions(df, type, isFraud, min_amount, max_amount)
@@ -51,6 +51,7 @@ def delete_transaction(transaction_id: int):
 @router.get("/by-customer/{customer_id}")
 def get_customer_debits(customer_id: int):
     """Liste les transactions sortantes (montant < 0)."""
+    # Cette route suppose que le service filtre les montants négatifs
     results = service.get_customer_flow(customer_id, flow_type="debit")
     if not results:
         raise HTTPException(status_code=404, detail="Aucun débit trouvé pour ce client")
@@ -62,8 +63,8 @@ def get_customer_debits(customer_id: int):
 @router.get("/to-customer/{customer_id}")
 def get_customer_credits(customer_id: int):
     """Liste les transactions reçues (montant > 0)."""
+    # Cette route suppose que le service filtre les montants positifs
     results = service.get_customer_flow(customer_id, flow_type="credit")
     if not results:
         raise HTTPException(status_code=404, detail="Aucun crédit trouvé pour ce client")
     return {"customer_id": customer_id, "type": "credit/destination", "transactions": results}
-
