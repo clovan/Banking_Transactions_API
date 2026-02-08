@@ -1,7 +1,4 @@
 from banking_transaction_api.data_loader import load_dataset, load_fraud_labels_dict
-#from pydantic import BaseModel
-#from typing import Optional, List
-#import pandas as pd
 
 class TransactionService:
     def __init__(self):
@@ -31,7 +28,7 @@ class TransactionService:
                         lambda tx_id: self._fraud_dict.get(int(tx_id), 0)
                     )
 
-                # Création de la colonne type = use_chip
+                # Création de la colonne transaction_type à partir de use_chip
                 if "use_chip" in self._df.columns:
                     self._df["transaction_type"] = self._df["use_chip"]
                 else:
@@ -45,8 +42,9 @@ class TransactionService:
 
         # Filtre type (équivalent use_chip)
         if transaction_type and "transaction_type" in df_filtered.columns:
-            df_filtered["transaction_type"] = df_filtered["transaction_type"].astype(str).str.upper()
-            df_filtered = df_filtered[df_filtered["transaction_type"] == type.upper()]
+            df_filtered = df_filtered[
+                df_filtered["transaction_type"].astype(str).str.lower() == transaction_type.lower()
+                ]
 
         # Filtre isFraud
         if isFraud is not None and "isFraud" in df_filtered.columns:
@@ -78,10 +76,11 @@ class TransactionService:
         if df.empty:
             return []
 
-        # La colonne réelle dans ton dataset est "use_chip"
-        col_type = "use_chip" if "use_chip" in df.columns else "type"
+        if "transaction_type" not in df.columns:
+            return []
 
-        return df[col_type].dropna().unique().tolist()
+        return df["transaction_type"].dropna().unique().tolist()
+
 
 
 

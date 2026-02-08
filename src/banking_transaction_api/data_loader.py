@@ -1,7 +1,8 @@
 import pandas as pd
+import json
 import os
 
-def load_dataset(file_name: str, nrows: int = 5000):
+def load_dataset(file_name: str, nrows: int = 100):
     path = os.path.join("data", file_name)
     if os.path.exists(path):
         df = pd.read_csv(path, nrows=nrows)
@@ -9,8 +10,6 @@ def load_dataset(file_name: str, nrows: int = 5000):
         return df.fillna(0)
     return pd.DataFrame()
 
-import json
-import os
 
 def load_fraud_labels_dict(json_path: str) -> dict:
     path = os.path.join("data", json_path)

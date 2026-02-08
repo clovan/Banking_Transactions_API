@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query, HTTPException, Body
+from fastapi import APIRouter, Query, HTTPException
 from banking_transaction_api.services.transactions_service import TransactionService
 
 router = APIRouter(prefix="/api/transactions", tags=["Transactions"])
@@ -22,11 +22,10 @@ def list_transactions(
 
     start = (page - 1) * limit
     results = df_filtered.iloc[start: start + limit].to_dict(orient="records")
-
-    # Renommer use_chip → type dans la réponse
     for tx in results:
         if "use_chip" in tx:
-            tx["transaction_type"] = tx.pop("use_chip")
+            tx["transaction_type"] = tx["use_chip"]
+            del tx["use_chip"]
 
     return {
         "page": page,
@@ -62,10 +61,19 @@ def search_transactions(
         max_amount=max_amount
     )
 
+    results = df_filtered.to_dict(orient="records")
+
+    # Masquer use_chip dans la réponse
+    for tx in results:
+        if "use_chip" in tx:
+            tx["transaction_type"] = tx["use_chip"]
+            del tx["use_chip"]
+
     return {
         "total_results": len(df_filtered),
-        "transactions": df_filtered.to_dict(orient="records")
+        "transactions": results
     }
+
 
 """Création de la route GET /api/transactions/types"""
 @router.get("/types")

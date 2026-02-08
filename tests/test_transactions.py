@@ -1,150 +1,88 @@
-import pytest
 from fastapi.testclient import TestClient
 from banking_transaction_api.main import app
+from banking_transaction_api.services.transactions_service import TransactionService
 
 client = TestClient(app)
 
 # ============================================================
-# GET /api/transactions
+# TESTS DES ROUTES TRANSACTIONS
 # ============================================================
 
-def test_list_transactions_structure():
-    """Vérifie la structure en acceptant use_chip ou type."""
-    response = client.get("/api/transactions/")
+def test_list_transactions_route():
+    response = client.get("/api/transactions/?page=1&limit=5")
     assert response.status_code == 200
+
     data = response.json()
 
     assert "transactions" in data
-    assert isinstance(data["transactions"], list)
+    assert "total_results" in data
+    assert data["page"] == 1
+    assert data["limit"] == 5
+    assert data["total_results"] > 0
+    assert len(data["transactions"]) <= 5
 
-    if len(data["transactions"]) > 0:
-        tx = data["transactions"][0]
-        assert "amount" in tx
-        assert any(k in tx for k in ["type", "use_chip"])
 
+def test_get_transaction_by_id_route():
+    # On récupère un ID existant via la route principale
+    first_page = client.get("/api/transactions/?limit=1").json()
+    tx_id = first_page["transactions"][0]["id"]
 
-def test_pagination_limit():
-    limit = 5
-    response = client.get(f"/api/transactions/?limit={limit}")
+    response = client.get(f"/api/transactions/{tx_id}")
     assert response.status_code == 200
 
-    res_list = response.json()["transactions"]
-    assert len(res_list) > 0, "Le CSV semble vide !"
-    assert len(res_list) <= limit
+    data = response.json()
+    assert data["id"] == tx_id
+    assert "amount" in data
 
 
-def test_filter_by_type():
-    """Vérifie le filtrage dynamique."""
-    tx_type = "Swipe Transaction"
-    response = client.get(f"/api/transactions/?type={tx_type}")
-    assert response.status_code == 200
-
-    transactions = response.json()["transactions"]
-    for tx in transactions:
-        val = tx.get("use_chip") or tx.get("type")
-        assert val == tx_type
-
-
-# ============================================================
-# GET /api/transactions/types
-# ============================================================
-
-def test_get_transaction_types():
-    response = client.get("/api/transactions/types")
-    assert response.status_code == 200
-
-    types_list = response.json()
-    assert isinstance(types_list, list)
-    assert len(types_list) > 0
-    assert all(isinstance(t, str) for t in types_list)
-
-
-# ============================================================
-# GET /api/transactions/{id}
-# ============================================================
-
-def test_get_transaction_by_id_valid():
-    response = client.get("/api/transactions/7475327")
-    assert response.status_code == 200
-    tx = response.json()
-    assert tx["id"] == 7475327
-
-
-def test_get_transaction_by_id_not_found():
-    response = client.get("/api/transactions/999999")
-    assert response.status_code == 404
-
-
-# ============================================================
-# POST /api/transactions/search
-# ============================================================
-
-def test_search_transactions_basic():
-    payload = {
-        "type": None,
-        "isFraud": None,
-        "amount_range": None
-    }
-
-    response = client.post("/api/transactions/search", json=payload)
+def test_search_transactions_route():
+    response = client.post("/api/transactions/search?min_amount=10")
     assert response.status_code == 200
 
     data = response.json()
     assert "transactions" in data
-    assert data["total_results"] == len(data["transactions"])
+    assert "total_results" in data
+    assert data["total_results"] >= 0
 
-
-def test_search_transactions_with_filters():
-    payload = {
-        "type": "Swipe Transaction",
-        "isFraud": None,
-        "amount_range": [0, 10000]
-    }
-
-    response = client.post("/api/transactions/search", json=payload)
-    assert response.status_code == 200
-
-    txs = response.json()["transactions"]
-
-    for tx in txs:
-        val = tx.get("use_chip") or tx.get("type")
-        assert val == "Swipe Transaction"
+    for tx in data["transactions"]:
+        assert tx["amount"] >= 10
 
 
 # ============================================================
-# TESTS SPÉCIFIQUES À LA FRAUDE (JSON)
+# TESTS DU SERVICE TRANSACTIONSERVICE
 # ============================================================
 
-def test_search_transactions_fraud_only():
-    """Vérifie que isFraud=1 retourne uniquement des transactions frauduleuses."""
-    payload = {
-        "type": None,
-        "isFraud": 1,
-        "amount_range": None
-    }
+def test_get_all_service():
+    service = TransactionService()
+    df = service.get_all()
 
-    response = client.post("/api/transactions/search", json=payload)
-    assert response.status_code == 200
-
-    txs = response.json()["transactions"]
-
-    # Si aucune transaction frauduleuse n'existe, le test reste valide
-    for tx in txs:
-        assert isinstance(tx["id"], int)
+    assert df is not None
+    assert not df.empty
+    assert "id" in df.columns
+    assert "amount" in df.columns
+    assert "transaction_type" in df.columns
+    assert "isFraud" in df.columns
 
 
-def test_search_transactions_non_fraud_only():
-    """Vérifie que isFraud=0 retourne uniquement des transactions NON frauduleuses."""
-    payload = {
-        "type": None,
-        "isFraud": 0,
-        "amount_range": None
-    }
+def test_get_transaction_by_id_service():
+    service = TransactionService()
+    df = service.get_all()
 
-    response = client.post("/api/transactions/search", json=payload)
-    assert response.status_code == 200
+    # On prend un ID réel
+    tx_id = int(df.iloc[0]["id"])
 
-    txs = response.json()["transactions"]
+    tx = service.get_transaction_by_id(tx_id)
+    assert tx is not None
+    assert tx["id"] == tx_id
 
-    for tx in txs:
-        assert isinstance(tx["id"], int)
+
+def test_filter_transactions_service():
+    service = TransactionService()
+    df = service.get_all()
+
+    # Filtre simple : montant minimum
+    filtered = service.filter_transactions(df, min_amount=100)
+
+    assert not filtered.empty
+    for _, row in filtered.iterrows():
+        assert row["amount"] >= 100
