@@ -18,7 +18,7 @@ def load_full_dataset():
         return pd.DataFrame()
 
     # --- Étape A : Lecture du CSV avec limite mémoire ---
-    df = pd.read_csv(csv_path, nrows=50000)
+    df = pd.read_csv(csv_path, nrows=5000)
 
     # --- Étape B : Nettoyage et conversion des montants ---
     df["amount"] = df["amount"].replace(r'[\$,]', '', regex=True)
