@@ -1,18 +1,17 @@
-from fastapi import APIRouter, Query, HTTPException, Path, Body
+from fastapi import APIRouter, Query, HTTPException, Path
 from pydantic import BaseModel
 from typing import List, Optional
 from banking_transaction_api.services.transaction_service import TransactionService
 
-# Configuration du router avec un tag clair pour Swagger
 router = APIRouter(prefix="/api/transactions", tags=["01. Gestion des Transactions"])
 service = TransactionService()
 
 
-# --- Modèle Pydantic pour la Route 3 (Validation JSON) ---
+# --- Modèle Pydantic ---
 class TransactionSearchCriteria(BaseModel):
-    type: Optional[str] = None  # Mappe vers use_chip dans le service
+    type: Optional[str] = None
     isFraud: Optional[int] = None
-    amount_range: Optional[List[float]] = None  # Format attendu : [min, max]
+    amount_range: Optional[List[float]] = None
 
 
 # =================================================================
@@ -25,45 +24,27 @@ def list_transactions(
         transaction_type: str = Query(None, alias="type"),
         isFraud: int = Query(None, ge=0, le=1),
         min_amount: float = Query(None),
-        max_amount: float = Query(None)
+        max_amount: float = Query(None),
 ):
-    """
-    Récupère la liste des transactions avec pagination et filtres optionnels.
-    Substitue automatiquement 'use_chip' par 'transaction_type'.
-    """
+    # Appel de la logique de filtrage du service
     df_filtered = service.filter_transactions(transaction_type, isFraud, min_amount, max_amount)
 
     if df_filtered.empty:
         return {"page": page, "limit": limit, "total_results": 0, "transactions": []}
 
+    # Pagination
     start = (page - 1) * limit
-    subset = df_filtered.iloc[start: start + limit].to_dict(orient="records")
+    subset = df_filtered.iloc[start: start + limit]
 
-    # Renommage des colonnes pour la sortie API
-    results = service._rename_columns(subset)
+    # Utilisation de la méthode de formatage du service
+    results = service._prepare_output(subset)
 
     return {
         "page": page,
         "limit": limit,
         "total_results": len(df_filtered),
-        "transactions": results
+        "transactions": results,
     }
-
-
-# =================================================================
-# ROUTE 2 : DÉTAILS D'UNE TRANSACTION (GET)
-# =================================================================
-@router.get("/{transaction_id}:int", summary="02. Détails d'une transaction")
-def get_transaction(
-        transaction_id: int = Path(..., description="L'identifiant numérique de la transaction")
-):
-    """
-    Retourne tous les détails d'une transaction spécifique.
-    """
-    transaction = service.get_transaction_by_id(transaction_id)
-    if not transaction:
-        raise HTTPException(status_code=404, detail=f"Transaction {transaction_id} introuvable.")
-    return transaction
 
 
 # =================================================================
@@ -71,61 +52,51 @@ def get_transaction(
 # =================================================================
 @router.post("/search", summary="03. Recherche multicritère (JSON)")
 def search_transactions(criteria: TransactionSearchCriteria):
-    """
-    Recherche avancée via un corps JSON.
-    Permet de filtrer par type (use_chip), statut de fraude et plage de montants.
-    """
-    filters = criteria.dict()
+    # Support pydantic v1 & v2
+    filters = criteria.model_dump() if hasattr(criteria, "model_dump") else criteria.dict()
     results = service.search_advanced(filters)
 
-    if not results:
-        raise HTTPException(status_code=404, detail="Aucune transaction ne correspond aux critères.")
-
+    # Retourne une liste vide si rien n'est trouvé (attendu par les tests)
     return {
         "count": len(results),
-        "results": results
+        "results": results,
     }
 
 
-
-
-#====================Route 4 """""""""""""""""""
+# =================================================================
+# ROUTE 4 : TYPES
+# =================================================================
 @router.get("/types", summary="04. Liste des types de transactions disponibles")
 def get_transaction_types():
-    df = service.get_all()
-
-    if df.empty:
-        raise HTTPException(status_code=404, detail="Aucune donnée disponible.")
-
-    # Valeurs uniques triées
-    types = sorted(df["use_chip"].dropna().unique().tolist())
-
+    types = service.get_types()
     return {"types": types}
-
-#==================Route 5 =================
-@router.get("/recent", summary="05. Dernières transactions")
-def get_recent_transactions(
-    n: int = Query(10, description="Nombre de transactions récentes à renvoyer")
-):
-    df = service.get_all()
-
-    if df.empty:
-        raise HTTPException(status_code=404, detail="Aucune donnée disponible.")
-
-    # On trie par ID décroissant (ou par date si tu en avais une)
-    recent = df.sort_values(by="id", ascending=False).head(n)
-
-    return recent.to_dict(orient="records")
 
 
 # =================================================================
-# ROUTE 6 : SUPPRESSION D'UNE TRANSACTION (DELETE)
+# ROUTE 5 : RECENT
+# =================================================================
+@router.get("/recent", summary="05. Dernières transactions")
+def get_recent_transactions(n: int = Query(10, ge=1)):
+    return service.get_recent(n)
+
+
+# =================================================================
+# ROUTE 2 : DÉTAILS D'UNE TRANSACTION (GET)
+# =================================================================
+# Placée après les routes statiques pour éviter les conflits d'URL
+@router.get("/{transaction_id}", summary="02. Détails d'une transaction")
+def get_transaction(transaction_id: int = Path(..., description="L'identifiant numérique de la transaction")):
+    transaction = service.get_transaction_by_id(transaction_id)
+    if not transaction:
+        raise HTTPException(status_code=404, detail=f"Transaction {transaction_id} introuvable.")
+    return transaction
+
+
+# =================================================================
+# ROUTE 6 : SUPPRESSION
 # =================================================================
 @router.delete("/{transaction_id}", summary="06. Suppression d'une transaction")
 def delete_transaction(transaction_id: int = Path(...)):
-    """
-    Supprime définitivement une transaction de la session actuelle.
-    """
     success = service.delete_transaction(transaction_id)
     if not success:
         raise HTTPException(status_code=404, detail="Transaction introuvable")
@@ -133,13 +104,10 @@ def delete_transaction(transaction_id: int = Path(...)):
 
 
 # =================================================================
-# ROUTE 7 : FLUX SORTANTS PAR CLIENT (GET)
+# ROUTE 7 : FLUX SORTANTS (DÉBITS)
 # =================================================================
 @router.get("/by-customer/{customer_id}", summary="07. Transactions sortantes (Débits)")
 def get_customer_debits(customer_id: int = Path(...)):
-    """
-    Liste les transactions émises par un client (montants négatifs).
-    """
     results = service.get_customer_flow(customer_id, flow_type="debit")
     if not results:
         raise HTTPException(status_code=404, detail=f"Aucun débit trouvé pour le client {customer_id}")
@@ -147,13 +115,10 @@ def get_customer_debits(customer_id: int = Path(...)):
 
 
 # =================================================================
-# ROUTE 8 : FLUX ENTRANTS PAR CLIENT (GET)
+# ROUTE 8 : FLUX ENTRANTS (CRÉDITS)
 # =================================================================
 @router.get("/to-customer/{customer_id}", summary="08. Transactions entrantes (Crédits)")
 def get_customer_credits(customer_id: int = Path(...)):
-    """
-    Liste les transactions reçues par un client (montants positifs).
-    """
     results = service.get_customer_flow(customer_id, flow_type="credit")
     if not results:
         raise HTTPException(status_code=404, detail=f"Aucun crédit trouvé pour le client {customer_id}")
