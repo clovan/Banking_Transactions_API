@@ -19,7 +19,7 @@ class FraudPredictResponse(BaseModel):
     isFraud: bool
     probability: float
 
-# --- Routes existantes ---
+# --- Routes 13 ---
 
 @router.get("/summary", summary="13. Résumé des fraudes")
 def get_fraud_summary():
@@ -35,6 +35,8 @@ def get_fraud_summary():
     if not summary:
         raise HTTPException(status_code=404, detail="Données indisponibles")
     return summary
+
+#=========Route 14===========
 
 @router.get("/by-type", summary="14. Fraudes par type de transaction")
 def get_fraud_by_type():

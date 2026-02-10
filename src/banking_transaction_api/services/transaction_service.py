@@ -83,3 +83,68 @@ class TransactionService:
         return filtered_df
 
     # ... (Autres méthodes existantes : delete_transaction, get_customer_flow)
+
+    #=========Route 4 et 5 =====
+    def get_types(self):
+        """Retourne la liste des types uniques de transactions."""
+        df = self.get_all()
+        return sorted(df["use_chip"].dropna().unique().tolist())
+
+    def get_recent(self, n: int = 10):
+        """Retourne les N dernières transactions (triées par ID décroissant)."""
+        df = self.get_all()
+        recent = df.sort_values(by="id", ascending=False).head(n)
+        return recent.to_dict(orient="records")
+
+    # =================================================================
+    # SUPPRESSION D'UNE TRANSACTION (Route 6)
+    # =================================================================
+    def delete_transaction(self, transaction_id: int) -> bool:
+        """
+        Supprime une transaction du DataFrame en mémoire.
+        Retourne True si la suppression a réussi, False sinon.
+        """
+        df = self.get_all()
+
+        # Vérifier si l'ID existe
+        if transaction_id not in df["id"].values:
+            return False
+
+        # Supprimer la ligne
+        self._df = df[df["id"] != transaction_id]
+
+        return True
+
+    # =================================================================
+    # ROUTES 7 & 8 : FLUX CLIENT BASÉS SUR LE SIGNE DU MONTANT
+    # =================================================================
+    def get_customer_flow(self, customer_id: int, flow_type: str):
+        """
+        Retourne les transactions d'un client selon le signe du montant :
+        - debit  : montant < 0
+        - credit : montant > 0
+        """
+        df = self.get_all()
+
+        if df.empty:
+            return []
+
+        # Conversion du montant en float (car amount est object dans ton dataset)
+        df = df.copy()
+        df["amount"] = df["amount"].astype(float)
+
+        # Filtrer sur le client
+        df_client = df[df["client_id"] == float(customer_id)]
+
+        if df_client.empty:
+            return []
+
+        # Sélection selon le type de flux
+        if flow_type == "debit":
+            result = df_client[df_client["amount"] < 0]
+        else:  # credit
+            result = df_client[df_client["amount"] > 0]
+
+        return result.to_dict(orient="records")
+
+

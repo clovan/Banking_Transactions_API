@@ -86,3 +86,26 @@ class StatsService:
                 "avg_amount": float(round(row['mean'], 2))
             })
         return result
+
+    #========Route 12==============
+    def get_daily_stats(self):
+        """Retourne le nombre de transactions par jour."""
+        df = self.transaction_service.get_all()
+
+        if df.empty:
+            return None
+
+        # Si la colonne date existe sous forme datetime complète
+        if "trans_date_trans_time" in df.columns:
+            df["date"] = pd.to_datetime(df["trans_date_trans_time"]).dt.date
+
+        # Si la colonne date existe déjà
+        elif "date" in df.columns:
+            df["date"] = pd.to_datetime(df["date"]).dt.date
+
+        else:
+            return None
+
+        daily = df.groupby("date").size().reset_index(name="count")
+
+        return daily.to_dict(orient="records")

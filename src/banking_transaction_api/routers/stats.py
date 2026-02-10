@@ -38,8 +38,14 @@ def get_amount_distribution(
         None,
         alias="bins",
         description="Paliers personnalisés. Exemple: ?bins=0&bins=100&bins=500",
-        example=[0, 100, 500, 1000, 5000]
+        examples={
+            "default": {
+                "summary": "Exemple de paliers personnalisés",
+                "value": [0, 100, 500, 1000, 5000]
+            }
+        }
     )
+
 ):
     """
     Retourne la distribution des montants sous forme d'histogramme.
@@ -77,3 +83,17 @@ def get_stats_by_type():
         )
 
     return data
+
+
+#=============Route 12==================
+@router.get("/daily", summary="12. Nombre de transactions par jour")
+def get_daily_stats():
+    result = stats_service.get_daily_stats()
+
+    if not result:
+        raise HTTPException(
+            status_code=404,
+            detail="Impossible de générer les statistiques journalières."
+        )
+
+    return result
