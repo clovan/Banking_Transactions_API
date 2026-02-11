@@ -3,6 +3,7 @@ from banking_transaction_api.data_loader import load_full_dataset
 
 
 class TransactionService:
+    """ """
     # Cache au niveau de la CLASSE (Singleton pour performance < 500ms)
     _cached_df = None
 
@@ -18,7 +19,17 @@ class TransactionService:
         return TransactionService._cached_df
 
     def _prepare_output(self, df: pd.DataFrame) -> list:
-        """Formatage vectorisé pour transformer use_chip en transaction_type."""
+        """Formatage vectorisé pour transformer use_chip en transaction_type.
+
+        Parameters
+        ----------
+        df: pd.DataFrame :
+            
+
+        Returns
+        -------
+
+        """
         if df.empty:
             return []
         data = df.copy()
@@ -29,8 +40,22 @@ class TransactionService:
 
     # --- ROUTE 1 : LOGIQUE DE FILTRAGE ET LISTE GLOBALE ---
     def filter_transactions(self, transaction_type=None, is_fraud=None, min_amount=None, max_amount=None):
-        """
-        Cœur de la Route 1 : Filtre les transactions selon les paramètres GET.
+        """Cœur de la Route 1 : Filtre les transactions selon les paramètres GET.
+
+        Parameters
+        ----------
+        transaction_type :
+             (Default value = None)
+        is_fraud :
+             (Default value = None)
+        min_amount :
+             (Default value = None)
+        max_amount :
+             (Default value = None)
+
+        Returns
+        -------
+
         """
         df = self.get_all()
         if df.empty:
@@ -57,16 +82,34 @@ class TransactionService:
 
     # --- ROUTE 2 : DÉTAIL TRANSACTION ---
     def get_transaction_by_id(self, transaction_id: int):
-        """Récupère une transaction unique par son identifiant numérique."""
+        """Récupère une transaction unique par son identifiant numérique.
+
+        Parameters
+        ----------
+        transaction_id: int :
+            
+
+        Returns
+        -------
+
+        """
         df = self.get_all()
         result = df[df["id"] == int(transaction_id)]
         return self._prepare_output(result)[0] if not result.empty else None
 
     # --- ROUTE 3 : RECHERCHE MULTICRITÈRE ---
     def search_advanced(self, filters: dict):
-        """
-        Recherche optimisée pour la Route 3 (POST).
+        """Recherche optimisée pour la Route 3 (POST).
         Défauts : 'Online Transaction' et montant entre 0 et 50.
+
+        Parameters
+        ----------
+        filters: dict :
+            
+
+        Returns
+        -------
+
         """
         # Type par défaut : Online Transaction
         transaction_type = filters.get("type") or "Online Transaction"
@@ -93,7 +136,17 @@ class TransactionService:
 
     # --- ROUTE 5 : TRANSACTIONS RÉCENTES ---
     def get_recent(self, n: int = 10):
-        """Récupère les N dernières transactions ajoutées au système."""
+        """Récupère les N dernières transactions ajoutées au système.
+
+        Parameters
+        ----------
+        n: int :
+             (Default value = 10)
+
+        Returns
+        -------
+
+        """
         df = self.get_all()
         if df.empty: return []
         # .tail() est immédiat, .iloc[::-1] inverse pour avoir la plus récente en haut
@@ -102,7 +155,17 @@ class TransactionService:
 
     # --- ROUTE 6 : SUPPRESSION TRANSACTION ---
     def delete_transaction(self, transaction_id: int) -> bool:
-        """Supprime une transaction de la mémoire vive."""
+        """Supprime une transaction de la mémoire vive.
+
+        Parameters
+        ----------
+        transaction_id: int :
+            
+
+        Returns
+        -------
+
+        """
         df = self.get_all()
         if int(transaction_id) not in df["id"].values:
             return False
@@ -112,8 +175,18 @@ class TransactionService:
 
     # --- ROUTES 7 & 8 : FLUX CLIENT (PAR client_id) ---
     def get_customer_flow(self, client_id: int, flow_type: str):
-        """
-        Filtre les débits (<0) ou les crédits (>0) pour un client donné.
+        """Filtre les débits (<0) ou les crédits (>0) pour un client donné.
+
+        Parameters
+        ----------
+        client_id: int :
+            
+        flow_type: str :
+            
+
+        Returns
+        -------
+
         """
         df = self.get_all()
         if df.empty: return []

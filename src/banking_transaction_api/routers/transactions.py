@@ -7,6 +7,7 @@ router = APIRouter(prefix="/api/transactions", tags=["01. Gestion des Transactio
 service = TransactionService()
 
 class TransactionSearchCriteria(BaseModel):
+    """ """
     type: Optional[str] = Field(default="Online Transaction")
     isFraud: Optional[int] = Field(None, ge=0, le=1)
     amount_range: Optional[List[float]] = Field(default=[0.0, 100.0], min_length=2, max_length=2)
@@ -21,6 +22,33 @@ def list_transactions(
     min_amount: float = Query(None),
     max_amount: float = Query(None),
 ):
+    """
+
+    Parameters
+    ----------
+    page: int :
+         (Default value = Query(1)
+    ge :
+         (Default value = 0)
+    limit: int :
+         (Default value = Query(20)
+    le :
+         (Default value = 1))
+    transaction_type: str :
+         (Default value = Query(None)
+    alias :
+         (Default value = "type"))
+    isFraud: int :
+         (Default value = Query(None)
+    min_amount: float :
+         (Default value = Query(None))
+    max_amount: float :
+         (Default value = Query(None))
+
+    Returns
+    -------
+
+    """
     df_filtered = service.filter_transactions(transaction_type, isFraud, min_amount, max_amount)
     if df_filtered.empty:
         return {"page": page, "limit": limit, "total_results": 0, "transactions": []}
@@ -30,19 +58,59 @@ def list_transactions(
 
 @router.post("/search", summary="03. Recherche multicritère (JSON)")
 def search_transactions(criteria: TransactionSearchCriteria):
+    """
+
+    Parameters
+    ----------
+    criteria: TransactionSearchCriteria :
+        
+
+    Returns
+    -------
+
+    """
     results = service.search_advanced(criteria.model_dump())
     return {"count": len(results), "results": results}
 
 @router.get("/types", summary="04. Liste des types")
 def get_transaction_types():
+    """ """
     return {"types": service.get_types()}
 
 @router.get("/recent", summary="05. Dernières transactions")
 def get_recent_transactions(n: int = Query(10, ge=1, le=100)):
+    """
+
+    Parameters
+    ----------
+    n: int :
+         (Default value = Query(10)
+    ge :
+         (Default value = 1)
+    le :
+         (Default value = 100))
+
+    Returns
+    -------
+
+    """
     return service.get_recent(n)
 
 @router.get("/{transaction_id}", summary="02. Détails d'une transaction")
 def get_transaction(transaction_id: int = Path(..., ge=0)):
+    """
+
+    Parameters
+    ----------
+    transaction_id: int :
+         (Default value = Path(...)
+    ge :
+         (Default value = 0))
+
+    Returns
+    -------
+
+    """
     transaction = service.get_transaction_by_id(transaction_id)
     if not transaction:
         raise HTTPException(status_code=404, detail=f"Transaction {transaction_id} introuvable.")
@@ -50,6 +118,19 @@ def get_transaction(transaction_id: int = Path(..., ge=0)):
 
 @router.delete("/{transaction_id}", summary="06. Suppression d'une transaction")
 def delete_transaction(transaction_id: int = Path(..., ge=0)):
+    """
+
+    Parameters
+    ----------
+    transaction_id: int :
+         (Default value = Path(...)
+    ge :
+         (Default value = 0))
+
+    Returns
+    -------
+
+    """
     if not service.delete_transaction(transaction_id):
         raise HTTPException(status_code=404, detail="Transaction introuvable")
     return {"status": "success", "message": f"Transaction {transaction_id} supprimée"}
@@ -58,18 +139,42 @@ def delete_transaction(transaction_id: int = Path(..., ge=0)):
 # ROUTES 7 & 8 : FLUX CLIENTS (MISES À JOUR)
 # =================================================================
 
-@router.get("/by-client/{client_id}", summary="07. Transactions sortantes (Débits)")
-def get_customer_debits(client_id: int = Path(..., description="L'ID du client pour les débits")):
-    results = service.get_customer_flow(client_id, flow_type="debit")
-    if not results:
-        # Message d'erreur personnalisé
-        raise HTTPException(status_code=404, detail="ce client n'a pas de debit dans compte")
-    return {"client_id": client_id, "type": "debit", "transactions": results}
+@router.get("/by-customer/{customer_id}", summary="07. Transactions sortantes (Débits)")
+def get_customer_debits(customer_id: int = Path(..., description="L'ID du client pour les débits")):
+    """
 
-@router.get("/to-client/{client_id}", summary="08. Transactions entrantes (Crédits)")
-def get_customer_credits(client_id: int = Path(..., description="L'ID du client pour les crédits")):
-    results = service.get_customer_flow(client_id, flow_type="credit")
+    Parameters
+    ----------
+    customer_id: int :
+         (Default value = Path(...)
+    description :
+         (Default value = "L'ID du client pour les débits"))
+
+    Returns
+    -------
+
+    """
+    results = service.get_customer_flow(customer_id, flow_type="debit")
     if not results:
-        # Message d'erreur personnalisé
+        raise HTTPException(status_code=404, detail="ce client n'a pas de debit dans compte")
+    return {"client_id": customer_id, "type": "debit", "transactions": results}
+
+@router.get("/to-customer/{customer_id}", summary="08. Transactions entrantes (Crédits)")
+def get_customer_credits(customer_id: int = Path(..., description="L'ID du client pour les crédits")):
+    """
+
+    Parameters
+    ----------
+    customer_id: int :
+         (Default value = Path(...)
+    description :
+         (Default value = "L'ID du client pour les crédits"))
+
+    Returns
+    -------
+
+    """
+    results = service.get_customer_flow(customer_id, flow_type="credit")
+    if not results:
         raise HTTPException(status_code=404, detail="ce client n'a pas de credit sur son compte")
-    return {"client_id": client_id, "type": "credit", "transactions": results}
+    return {"client_id": customer_id, "type": "credit", "transactions": results}

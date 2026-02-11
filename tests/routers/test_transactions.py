@@ -73,32 +73,35 @@ def test_route_6_delete_transaction():
 # ROUTE 7 : FLUX SORTANTS (DÉBITS)
 # =================================================================
 
-def test_route_7_client_debits_flow():
+def test_route_7_customer_debits_flow():
     """Vérifie le flux de débit pour le client 825."""
-    response = client.get("/api/transactions/by-client/825")
+    response = client.get("/api/transactions/by-customer/825")
     assert response.status_code in [200, 404]
     if response.status_code == 404:
         assert response.json()["detail"] == "ce client n'a pas de debit dans compte"
 
-def test_route_7_client_debits_not_found():
+
+def test_route_7_customer_debits_not_found():
     """Vérifie le message d'erreur personnalisé."""
-    response = client.get("/api/transactions/by-client/9999999")
+    response = client.get("/api/transactions/by-customer/9999999")
     assert response.status_code == 404
     assert response.json()["detail"] == "ce client n'a pas de debit dans compte"
+
 
 # =================================================================
 # ROUTE 8 : FLUX ENTRANTS (CRÉDITS)
 # =================================================================
 
-def test_route_8_client_credits_flow():
+def test_route_8_customer_credits_flow():
     """Vérifie le flux de crédit pour le client 825."""
-    response = client.get("/api/transactions/to-client/825")
+    response = client.get("/api/transactions/to-customer/825")
     assert response.status_code in [200, 404]
     if response.status_code == 404:
         assert response.json()["detail"] == "ce client n'a pas de credit sur son compte"
 
-def test_route_8_client_credits_not_found():
+
+def test_route_8_customer_credits_not_found():
     """Vérifie le message d'erreur personnalisé."""
-    response = client.get("/api/transactions/to-client/9999999")
+    response = client.get("/api/transactions/to-customer/9999999")
     assert response.status_code == 404
     assert response.json()["detail"] == "ce client n'a pas de credit sur son compte"

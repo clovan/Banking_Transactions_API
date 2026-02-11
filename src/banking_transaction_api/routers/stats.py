@@ -15,17 +15,20 @@ stats_service = StatsService(tx_service)
 
 # --- Modèles de réponse pour la documentation ---
 class GlobalStatsResponse(BaseModel):
+    """ """
     total_transactions: int
     fraud_rate: float
     avg_amount: float
     most_common_type: str
 
 class DistributionResponse(BaseModel):
+    """ """
     bins: List[str]
     counts: List[int]
     applied_bins: List[float]
 
 class TypeStatsResponse(BaseModel):
+    """ """
     type: str
     count: int
     avg_amount: float
@@ -37,9 +40,7 @@ class TypeStatsResponse(BaseModel):
             summary="09. Vue d'ensemble des statistiques",
             response_model=GlobalStatsResponse)
 def get_stats_overview():
-    """
-    Indicateurs globaux : Volume total, Fraude (JSON), Montant (ABS), Mode (use_chip).
-    """
+    """Indicateurs globaux : Volume total, Fraude (JSON), Montant (ABS), Mode (use_chip)."""
     stats = stats_service.get_global_stats()
     if not stats:
         raise HTTPException(status_code=404, detail="Données statistiques indisponibles")
@@ -68,9 +69,43 @@ def get_amount_distribution(
         }
     )
 ):
-    """
-    Distribution des montants par paliers.
+    """Distribution des montants par paliers.
     Par défaut : [0, 100, 500, 1000, 5000].
+
+    Parameters
+    ----------
+    bins: Optional[List[float]] :
+         (Default value = Query(None)
+    alias :
+         (Default value = "bins")
+    description :
+         (Default value = "Paliers personnalisés pour l'histogramme.")
+    openapi_examples :
+         (Default value = {"default_paliers": Example(summary="Paliers standard")
+    value :
+         (Default value = [0)
+    100 :
+        
+    500 :
+        
+    1000 :
+        
+    5000]) :
+        
+    "petits_montants": Example(summary :
+         (Default value = "Focus transactions < 100")
+    10 :
+        
+    25 :
+        
+    50 :
+        
+    100])}) :
+        
+
+    Returns
+    -------
+
     """
     dist = stats_service.get_amount_distribution(custom_bins=bins)
     if not dist:
@@ -86,9 +121,7 @@ def get_amount_distribution(
             summary="11. Statistiques par type de transaction",
             response_model=List[TypeStatsResponse])
 def get_stats_by_type():
-    """
-    Agrégations par type de transaction (use_chip) : volume et moyenne.
-    """
+    """Agrégations par type de transaction (use_chip) : volume et moyenne."""
     data = stats_service.get_stats_by_type()
     if data is None:
         raise HTTPException(status_code=404, detail="Agrégation par type impossible")
@@ -99,9 +132,7 @@ def get_stats_by_type():
 # =================================================================
 @router.get("/daily", summary="12. Nombre de transactions par jour")
 def get_daily_stats():
-    """
-    Analyse de tendance temporelle basée sur le champ 'date'.
-    """
+    """Analyse de tendance temporelle basée sur le champ 'date'."""
     result = stats_service.get_daily_stats()
     if not result:
         raise HTTPException(status_code=404, detail="Statistiques temporelles indisponibles")

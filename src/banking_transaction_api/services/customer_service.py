@@ -3,6 +3,7 @@ from banking_transaction_api.data_loader import load_user_data, load_full_datase
 
 
 class CustomerService:
+    """ """
     def __init__(self):
         self._df_users = None
         self._df_trans = None
@@ -36,6 +37,24 @@ class CustomerService:
     # ROUTE 16 : LISTE PAGINÉE DES CLIENTS
     # =================================================================
     def get_paginated_customers(self, page: int = 1, size: int = 10):
+        """
+
+        Parameters
+        ----------
+        page : int :
+            (Default value = 1)
+        size : int :
+            (Default value = 10)
+        page: int :
+             (Default value = 1)
+        size: int :
+             (Default value = 10)
+
+        Returns
+        -------
+
+        
+        """
         df = self.df_users
         if df is None or df.empty:
             return {"total": 0, "page": page, "size": size, "data": []}
@@ -59,8 +78,19 @@ class CustomerService:
     # ROUTE 18 : TOP CLIENTS PAR VOLUME DE TRANSACTIONS
     # =================================================================
     def get_top_customers(self, n: int = 10):
-        """
-        Classe les clients par nombre total de transactions.
+        """Classe les clients par nombre total de transactions.
+
+        Parameters
+        ----------
+        n : int :
+            (Default value = 10)
+        n: int :
+             (Default value = 10)
+
+        Returns
+        -------
+
+        
         """
         df_t = self.df_trans
         if df_t is None or df_t.empty:
@@ -87,6 +117,20 @@ class CustomerService:
     # ROUTE 17 : PROFIL CLIENT SYNTHÉTIQUE
     # =================================================================
     def get_customer_profile(self, customer_id: int):
+        """
+
+        Parameters
+        ----------
+        customer_id : int :
+            
+        customer_id: int :
+            
+
+        Returns
+        -------
+
+        
+        """
         df_t = self.df_trans
         if df_t is None or df_t.empty:
             return {"id": str(customer_id), "error": "Données transactions indisponibles"}

@@ -2,6 +2,7 @@ import pandas as pd
 from banking_transaction_api.data_loader import load_full_dataset
 
 class FraudDetectionService:
+    """ """
     # Variable de CLASSE pour le cache partagé (Singleton)
     _cached_df = None
 
@@ -60,14 +61,22 @@ class FraudDetectionService:
     # --- SECTION 2 : PRÉDICTION TEMPS RÉEL (Route 15) ---
 
     def predict_fraud(self, data: dict):
-        """
-        Scoring aligné sur les tests unitaires.
+        """Scoring aligné sur les tests unitaires.
         Logique de calcul cumulative :
         - Base : 0.05
         - Type (Online/Transfer) : +0.45 (sinon +0.05)
         - Montant > 3000 : +0.35
         - Montant > 500 : +0.15
         - Solde vidé : +0.14
+
+        Parameters
+        ----------
+        data: dict :
+            
+
+        Returns
+        -------
+
         """
         probability = 0.05  # Score de base
 

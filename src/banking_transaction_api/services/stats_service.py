@@ -19,6 +19,7 @@ class StatsService:
     # ROUTE 9 : STATISTIQUES GLOBALES
     # =================================================================
     def get_global_stats(self):
+        """ """
         df = self._get_cleaned_df()
         if df is None or df.empty:
             return None
@@ -34,9 +35,17 @@ class StatsService:
     # ROUTE 10 : DISTRIBUTION DES MONTANTS (BINS)
     # =================================================================
     def get_amount_distribution(self, custom_bins: list = None):
-        """
-        Génère la distribution des montants.
+        """Génère la distribution des montants.
         Par défaut : [0, 100, 500, 1000, 5000]
+
+        Parameters
+        ----------
+        custom_bins: list :
+             (Default value = None)
+
+        Returns
+        -------
+
         """
         df = self._get_cleaned_df()
         if df is None or df.empty:
@@ -71,6 +80,7 @@ class StatsService:
     # ROUTE 11 : STATISTIQUES PAR TYPE
     # =================================================================
     def get_stats_by_type(self):
+        """ """
         df = self._get_cleaned_df()
         if df is None or df.empty:
             return None
