@@ -1,34 +1,38 @@
 import pytest
 import pandas as pd
-# Vérifie que ce nom de fichier est bien celui dans src/banking_transaction_api/services/
 from banking_transaction_api.services.fraud_detection_service import FraudDetectionService
 
 
 # =================================================================
-# FIXTURE : Simulation des données de fraude
+# FIXTURE : Simulation des données de fraude avec Reset du Cache
 # =================================================================
 
 class MockDataLoader:
     def __call__(self):
-        # On crée un jeu de données contrôlé :
-        # - 2 fraudes réelles (ID 3 et 4)
-        # - 1 transaction qui sera "flagged" par la règle (>500 + Online)
+        # On crée un jeu de données contrôlé pour valider la logique mathématique
         return pd.DataFrame([
             {"id": 1, "use_chip": "Online Transaction", "amount": 100.0, "isFraud": 0},
-            {"id": 2, "use_chip": "Online Transaction", "amount": 600.0, "isFraud": 0},  # Flagged mais pas fraude
+            {"id": 2, "use_chip": "Online Transaction", "amount": 600.0, "isFraud": 0},  # Flagged (600 > 500)
             {"id": 3, "use_chip": "Swipe Transaction", "amount": 50.0, "isFraud": 1},  # Fraude réelle
-            {"id": 4, "use_chip": "Online Transaction", "amount": 1000.0, "isFraud": 1},  # Flagged ET fraude
+            {"id": 4, "use_chip": "Online Transaction", "amount": 1000.0, "isFraud": 1},  # Flagged + Fraude
         ])
 
 
 @pytest.fixture
 def fraud_service(monkeypatch):
-    # CORRECTION : Le chemin ici doit correspondre au nom du fichier importé plus haut
-    # Si ton fichier s'appelle fraud_detection_service.py, le patch doit être :
+    """
+    Fixture qui force le service à utiliser les données de test.
+    Crucial : On doit vider le cache Singleton pour que le mock soit pris en compte.
+    """
+    # 1. On injecte le chargeur de données fictives
     monkeypatch.setattr(
         "banking_transaction_api.services.fraud_detection_service.load_full_dataset",
         MockDataLoader()
     )
+
+    # 2. On FORCE la réinitialisation du cache de classe (Singleton)
+    FraudDetectionService._cached_df = None
+
     return FraudDetectionService()
 
 
@@ -67,8 +71,6 @@ def test_fraud_by_type_logic(fraud_service):
 # TESTS SECTION 2 : PRÉDICTION TEMPS RÉEL
 # =================================================================
 
-
-
 def test_predict_fraud_high_risk(fraud_service):
     """Teste une transaction à haut risque (Montant élevé + Type TRANSFER)."""
     data = {
@@ -79,7 +81,7 @@ def test_predict_fraud_high_risk(fraud_service):
     }
     prediction = fraud_service.predict_fraud(data)
 
-    # Base(0.05) + TRANSFER(0.45) + Amount>3000(0.35) = 0.85
+    # Logique : Base(0.05) + TRANSFER(0.45) + Amount>3000(0.35) = 0.85
     assert prediction["probability"] == 0.85
     assert prediction["isFraud"] is True
 
@@ -94,7 +96,7 @@ def test_predict_fraud_balance_anomaly(fraud_service):
     }
     prediction = fraud_service.predict_fraud(data)
 
-    # Base(0.05) + AutreType(0.05) + Amount<500(0) + BalanceZero(0.14) = 0.24
+    # Logique : Base(0.05) + AutreType(0.05) + Amount<500(0) + BalanceZero(0.14) = 0.24
     assert prediction["probability"] == 0.24
     assert prediction["isFraud"] is False
 
@@ -109,6 +111,6 @@ def test_predict_fraud_low_risk(fraud_service):
     }
     prediction = fraud_service.predict_fraud(data)
 
-    # Base(0.05) + Autre(0.05) = 0.10
+    # Logique : Base(0.05) + Autre(0.05) = 0.10
     assert prediction["probability"] == 0.10
     assert prediction["isFraud"] is False
