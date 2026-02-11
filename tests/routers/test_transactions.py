@@ -1,4 +1,4 @@
-import pytest
+from banking_transaction_api.main import app
 from fastapi.testclient import TestClient
 import sys
 import os
@@ -6,13 +6,13 @@ import os
 # Ajout du chemin racine pour les imports
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from banking_transaction_api.main import app
 
 client = TestClient(app)
 
 # =================================================================
 # ROUTE 1 : LISTE ET FILTRAGE GLOBAL
 # =================================================================
+
 
 def test_route_1_list_structure():
     """Vérifie le contrat d'interface : renommage transaction_type et pagination."""
@@ -26,6 +26,7 @@ def test_route_1_list_structure():
         assert "transaction_type" in tx
         assert isinstance(tx["amount"], (int, float))
 
+
 def test_route_1_filter_fraud():
     """Vérifie le filtrage des fraudes."""
     response = client.get("/api/transactions/?isFraud=1")
@@ -34,6 +35,7 @@ def test_route_1_filter_fraud():
 # =================================================================
 # ROUTE 3 : RECHERCHE AVANCÉE (POST)
 # =================================================================
+
 
 def test_route_3_search_advanced():
     """Vérifie la recherche multicritère."""
@@ -48,11 +50,13 @@ def test_route_3_search_advanced():
 # ROUTE 2 : DÉTAILS D'UNE TRANSACTION (FIXE)
 # =================================================================
 
+
 def test_route_2_get_transaction_detail():
     """Vérifie la récupération par l'ID 0 (toujours présent au début du CSV)."""
     response = client.get("/api/transactions/0")
     # On accepte 200 si chargé, ou 404 si le fichier n'est vraiment pas lu
     assert response.status_code in [200, 404]
+
 
 def test_route_2_not_found():
     """Vérifie le message 404 sur ID inexistant."""
@@ -64,6 +68,7 @@ def test_route_2_not_found():
 # ROUTE 6 : SUPPRESSION
 # =================================================================
 
+
 def test_route_6_delete_transaction():
     """Vérifie la suppression de l'ID 0."""
     response = client.delete("/api/transactions/0")
@@ -72,6 +77,7 @@ def test_route_6_delete_transaction():
 # =================================================================
 # ROUTE 7 : FLUX SORTANTS (DÉBITS)
 # =================================================================
+
 
 def test_route_7_customer_debits_flow():
     """Vérifie le flux de débit pour le client 825."""

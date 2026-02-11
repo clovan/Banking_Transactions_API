@@ -27,8 +27,8 @@ with tab1:
 
         col1.metric("Total fraudes", data["total_frauds"])
         col2.metric("Transactions flaggées", data["flagged"])
-        col3.metric("Précision", f"{data['precision']*100:.1f}%")
-        col4.metric("Rappel", f"{data['recall']*100:.1f}%")
+        col3.metric("Précision", f"{data['precision'] * 100:.1f}%")
+        col4.metric("Rappel", f"{data['recall'] * 100:.1f}%")
 
 
 # ============================================================
@@ -78,5 +78,5 @@ with tab3:
         else:
             st.success(
                 f"Fraude probable : {'Oui' if result['isFraud'] else 'Non'} "
-                f"(probabilité : {result['probability']*100:.1f}%)"
+                f"(probabilité : {result['probability'] * 100:.1f}%)"
             )

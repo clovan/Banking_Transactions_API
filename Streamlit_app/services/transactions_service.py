@@ -1,6 +1,7 @@
 import requests
 from config.settings import API_BASE_URL
 
+
 class TransactionsAPI:
     def __init__(self):
         self.base_url = f"{API_BASE_URL}/transactions"

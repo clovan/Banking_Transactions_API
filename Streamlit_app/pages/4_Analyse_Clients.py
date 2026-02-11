@@ -34,7 +34,9 @@ with tab1:
                 if df[col].dtype == "object":
                     df[col] = df[col].astype(str)
 
-            st.write(f"Total clients : {data['total']} — Page {data['page']} / {data['pages']}")
+            st.write(
+                f"Total clients : {data['total']} — Page {data['page']} / "
+                f"{data['pages']}")
             st.dataframe(df)
 
 

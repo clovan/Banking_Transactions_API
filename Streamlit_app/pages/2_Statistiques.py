@@ -37,7 +37,7 @@ with tab1:
         col1, col2, col3, col4 = st.columns(4)
 
         col1.metric("Total transactions", data["total_transactions"])
-        col2.metric("Taux de fraude", f"{data['fraud_rate']*100:.2f}%")
+        col2.metric("Taux de fraude", f"{data['fraud_rate'] * 100:.2f}%")
         col3.metric("Montant moyen", f"{data['avg_amount']} €")
         col4.metric("Type le plus fréquent", data["most_common_type"])
 
@@ -56,7 +56,7 @@ with tab2:
     if st.button("Générer l'histogramme", key="generate_histogram"):
         try:
             bins = [float(x.strip()) for x in bins_input.split(",")]
-        except:
+        except Exception:
             st.error("Format invalide. Exemple : 0, 100, 500, 1000")
             bins = None
 

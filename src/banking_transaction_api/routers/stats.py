@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query
-from fastapi.openapi.models import Example  # Correction pour les exemples OpenAPI
-from typing import List, Optional, Dict, Any
+from fastapi.openapi.models import Example
+from typing import List, Optional
 from pydantic import BaseModel
 
 # Vérifie bien que l'import correspond au nom exact de tes fichiers services
@@ -14,6 +14,8 @@ tx_service = TransactionService()
 stats_service = StatsService(tx_service)
 
 # --- Modèles de réponse pour la documentation ---
+
+
 class GlobalStatsResponse(BaseModel):
     """ """
     total_transactions: int
@@ -21,11 +23,13 @@ class GlobalStatsResponse(BaseModel):
     avg_amount: float
     most_common_type: str
 
+
 class DistributionResponse(BaseModel):
     """ """
     bins: List[str]
     counts: List[int]
     applied_bins: List[float]
+
 
 class TypeStatsResponse(BaseModel):
     """ """
@@ -36,19 +40,24 @@ class TypeStatsResponse(BaseModel):
 # =================================================================
 # ROUTE 9 : VUE D'ENSEMBLE DES STATISTIQUES
 # =================================================================
+
+
 @router.get("/overview",
             summary="09. Vue d'ensemble des statistiques",
             response_model=GlobalStatsResponse)
 def get_stats_overview():
-    """Indicateurs globaux : Volume total, Fraude (JSON), Montant (ABS), Mode (use_chip)."""
+    """Indicateurs globaux :Volume total, Fraude, Montant (ABS), Mode (use_chip)."""
     stats = stats_service.get_global_stats()
     if not stats:
-        raise HTTPException(status_code=404, detail="Données statistiques indisponibles")
+        raise HTTPException(
+            status_code=404, detail="Données statistiques indisponibles")
     return stats
 
 # =================================================================
 # ROUTE 10 : DISTRIBUTION DES MONTANTS (HISTOGRAMME)
 # =================================================================
+
+
 @router.get("/amount-distribution",
             summary="10. Distribution des montants",
             response_model=DistributionResponse)
@@ -85,23 +94,23 @@ def get_amount_distribution(
     value :
          (Default value = [0)
     100 :
-        
+
     500 :
-        
+
     1000 :
-        
+
     5000]) :
-        
+
     "petits_montants": Example(summary :
          (Default value = "Focus transactions < 100")
     10 :
-        
+
     25 :
-        
+
     50 :
-        
+
     100])}) :
-        
+
 
     Returns
     -------
@@ -111,7 +120,6 @@ def get_amount_distribution(
     if not dist:
         raise HTTPException(status_code=404, detail="Calcul de distribution impossible")
     return dist
-
 
 
 # =================================================================
@@ -130,10 +138,13 @@ def get_stats_by_type():
 # =================================================================
 # ROUTE 12 : ANALYSE TEMPORELLE (JOURNALIÈRE)
 # =================================================================
+
+
 @router.get("/daily", summary="12. Nombre de transactions par jour")
 def get_daily_stats():
     """Analyse de tendance temporelle basée sur le champ 'date'."""
     result = stats_service.get_daily_stats()
     if not result:
-        raise HTTPException(status_code=404, detail="Statistiques temporelles indisponibles")
+        raise HTTPException(
+            status_code=404, detail="Statistiques temporelles indisponibles")
     return result

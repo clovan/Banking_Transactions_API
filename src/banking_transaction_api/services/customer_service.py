@@ -4,6 +4,7 @@ from banking_transaction_api.data_loader import load_user_data, load_full_datase
 
 class CustomerService:
     """ """
+
     def __init__(self):
         self._df_users = None
         self._df_trans = None
@@ -53,7 +54,7 @@ class CustomerService:
         Returns
         -------
 
-        
+
         """
         df = self.df_users
         if df is None or df.empty:
@@ -90,7 +91,7 @@ class CustomerService:
         Returns
         -------
 
-        
+
         """
         df_t = self.df_trans
         if df_t is None or df_t.empty:
@@ -122,18 +123,19 @@ class CustomerService:
         Parameters
         ----------
         customer_id : int :
-            
+
         customer_id: int :
-            
+
 
         Returns
         -------
 
-        
+
         """
         df_t = self.df_trans
         if df_t is None or df_t.empty:
-            return {"id": str(customer_id), "error": "Données transactions indisponibles"}
+            return {"id": str(customer_id),
+                    "error": "Données transactions indisponibles"}
 
         user_transactions = df_t[df_t['client_id'].astype(str) == str(customer_id)]
 
@@ -147,4 +149,3 @@ class CustomerService:
             "avg_amount": avg_amount,
             "fraudulent": is_fraudulent
         }
-

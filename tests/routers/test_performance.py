@@ -1,5 +1,4 @@
 import time
-import pytest
 from fastapi.testclient import TestClient
 from banking_transaction_api.main import app
 

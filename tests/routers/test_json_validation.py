@@ -1,4 +1,3 @@
-import pytest
 from fastapi.testclient import TestClient
 from banking_transaction_api.main import app
 
@@ -34,22 +33,23 @@ def test_search_invalid_fraud_value():
 
 
 def test_predict_fraud_missing_fields():
-    """Vérifie que la prédiction rejette les JSON incomplets si des champs sont requis."""
-    # Si ton modèle Pydantic exige 'amount', l'envoi d'un dictionnaire vide doit échouer
+    """Vérifie que la prédiction rejette les JSON incomplets
+     si des champs sont requis."""
+    # Si Pydantic exige 'amount', l'envoi d'un dictionnaire vide doit échouer
     response = client.post("/api/fraud/predict", json={})
 
     # Si ton API est strictement typée, elle doit répondre 422
     assert response.status_code == 422
 
 
-
-
 def test_search_malformed_json_syntax():
-    """Vérifie le comportement face à une erreur de syntaxe JSON pure (ex: virgule manquante)."""
+    """Vérifie le comportement face à une erreur de syntaxe JSON pure
+     (ex: virgule manquante)."""
     headers = {"Content-Type": "application/json"}
     bad_syntax_data = '{"type": "TRANSFER" "amount": 100}'  # Manque la virgule
 
-    response = client.post("/api/transactions/search", content=bad_syntax_data, headers=headers)
+    response = client.post("/api/transactions/search",
+                           content=bad_syntax_data, headers=headers)
 
     # CORRECTION : Selon la version de FastAPI/Starlette, une erreur de parsing
     # peut renvoyer 400 ou 422. On accepte les deux pour valider le rejet.

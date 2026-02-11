@@ -8,6 +8,8 @@ service = CustomerService()
 # =================================================================
 # 1. ROUTE 16 : LISTE GÉNÉRALE (Racine)
 # =================================================================
+
+
 @router.get(
     "/",
     summary="16. Liste paginée des clients",
@@ -42,6 +44,7 @@ def get_customers(
 # 2. ROUTE 18 : CLASSEMENT (Chemin fixe /top)
 # =================================================================
 # IMPORTANT : Cette route doit être AVANT /{customer_id}
+
 
 @router.get(
     "/top",
@@ -98,5 +101,3 @@ def get_customer_profile(
 
     """
     return service.get_customer_profile(customer_id)
-
-

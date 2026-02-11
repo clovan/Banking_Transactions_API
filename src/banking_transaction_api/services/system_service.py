@@ -1,9 +1,9 @@
 import time
-from datetime import datetime
 
 
 class SystemService:
     """ """
+
     def __init__(self, transaction_service):
         self.transaction_service = transaction_service
         # Enregistré une seule fois au lancement du serveur

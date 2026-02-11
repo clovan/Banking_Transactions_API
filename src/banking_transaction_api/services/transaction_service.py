@@ -24,7 +24,7 @@ class TransactionService:
         Parameters
         ----------
         df: pd.DataFrame :
-            
+
 
         Returns
         -------
@@ -39,7 +39,8 @@ class TransactionService:
         return data.fillna(0).infer_objects(copy=False).to_dict(orient="records")
 
     # --- ROUTE 1 : LOGIQUE DE FILTRAGE ET LISTE GLOBALE ---
-    def filter_transactions(self, transaction_type=None, is_fraud=None, min_amount=None, max_amount=None):
+    def filter_transactions(self, transaction_type=None, is_fraud=None,
+                            min_amount=None, max_amount=None):
         """Cœur de la Route 1 : Filtre les transactions selon les paramètres GET.
 
         Parameters
@@ -87,7 +88,7 @@ class TransactionService:
         Parameters
         ----------
         transaction_id: int :
-            
+
 
         Returns
         -------
@@ -105,7 +106,7 @@ class TransactionService:
         Parameters
         ----------
         filters: dict :
-            
+
 
         Returns
         -------
@@ -123,14 +124,16 @@ class TransactionService:
         max_amt = amount_range[1]
 
         # Utilisation de la logique de filtrage commune
-        df_filtered = self.filter_transactions(transaction_type, is_fraud, min_amt, max_amt)
+        df_filtered = self.filter_transactions(
+            transaction_type, is_fraud, min_amt, max_amt)
         return self._prepare_output(df_filtered)
 
     # --- ROUTE 4 : LISTE DES TYPES ---
     def get_types(self):
         """Récupère la liste triée de tous les types 'use_chip' disponibles."""
         df = self.get_all()
-        if df.empty: return []
+        if df.empty:
+            return []
         col = "use_chip" if "use_chip" in df.columns else "transaction_type"
         return sorted(df[col].dropna().unique().tolist())
 
@@ -148,7 +151,8 @@ class TransactionService:
 
         """
         df = self.get_all()
-        if df.empty: return []
+        if df.empty:
+            return []
         # .tail() est immédiat, .iloc[::-1] inverse pour avoir la plus récente en haut
         recent = df.tail(int(n)).iloc[::-1]
         return self._prepare_output(recent)
@@ -160,7 +164,7 @@ class TransactionService:
         Parameters
         ----------
         transaction_id: int :
-            
+
 
         Returns
         -------
@@ -180,16 +184,17 @@ class TransactionService:
         Parameters
         ----------
         client_id: int :
-            
+
         flow_type: str :
-            
+
 
         Returns
         -------
 
         """
         df = self.get_all()
-        if df.empty: return []
+        if df.empty:
+            return []
 
         amounts = pd.to_numeric(df["amount"], errors='coerce')
         # Masque combiné : ID client + Signe du montant

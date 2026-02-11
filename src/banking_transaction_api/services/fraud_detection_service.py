@@ -1,5 +1,5 @@
-import pandas as pd
 from banking_transaction_api.data_loader import load_full_dataset
+
 
 class FraudDetectionService:
     """ """
@@ -13,7 +13,7 @@ class FraudDetectionService:
         self.df = FraudDetectionService._cached_df
 
     def _get_type_column(self):
-        """Détecte dynamiquement la colonne de type (résout le conflit avec TransactionService)."""
+        """Détecte dynamiquement la colonne de type """
         if "use_chip" in self.df.columns:
             return "use_chip"
         return "transaction_type"
@@ -32,14 +32,16 @@ class FraudDetectionService:
         # 2. Flagged (Détection suspecte selon règle métier)
         type_col = self._get_type_column()
         condition_flag = (self.df['amount'] > 500) & \
-                         (self.df[type_col].astype(str).str.contains('Online', case=False, na=False))
+                         (self.df[type_col].astype(str).str.contains(
+                             'Online', case=False, na=False))
 
         flagged_count = int(condition_flag.sum())
 
         # 3. True Positives (Intersection Flagged & Réel)
         true_positives = int((condition_flag & is_fraud_mask).sum())
 
-        precision = round(true_positives / flagged_count, 2) if flagged_count > 0 else 0.0
+        precision = round(true_positives / flagged_count,
+                          2) if flagged_count > 0 else 0.0
         recall = round(true_positives / total_frauds, 2) if total_frauds > 0 else 0.0
 
         return {
@@ -72,7 +74,7 @@ class FraudDetectionService:
         Parameters
         ----------
         data: dict :
-            
+
 
         Returns
         -------
@@ -93,7 +95,8 @@ class FraudDetectionService:
 
         # Règle 2 : Influence du Montant (Paliers ajustés pour les tests)
         if amount > 3000:
-            probability += 0.35  # Nécessaire pour atteindre 0.85 dans test_predict_fraud_high_risk
+            # Nécessaire pour atteindre 0.85 dans test_predict_fraud_high_risk
+            probability += 0.35
         elif amount > 500:
             probability += 0.15
 
