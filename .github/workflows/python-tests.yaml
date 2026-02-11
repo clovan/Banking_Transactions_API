@@ -16,24 +16,36 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.12' # Aligné sur ta version locale
+          cache: 'pip'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          # Installation de toutes les bibliothèques nécessaires pour FastAPI et les tests
-          pip install pytest fastapi uvicorn pandas httpx
+          # Installation du projet et des outils de couverture
+          pip install -e .
+          pip install pytest pytest-cov httpx pandas fastapi uvicorn pydantic python-dotenv
 
-      - name: Prepare Workspace
-        # On recrée le dossier data et le fichier CSV factice pour éviter le FileNotFoundError
+      - name: Prepare Workspace (Dummy Data)
+        # On injecte les données réelles fournies dans les fichiers CSV de test
         run: |
           mkdir -p data
-          echo "amount,use_chip,isFraud" > data/transactions_data.csv
-          echo "$10.0,Swipe Transaction,0" >> data/transactions_data.csv
+          
+          # 1. Création du fichier transactions_data.csv
+          # On inclut une ligne normale (848) et une ligne de fraude pour tes tests stats
+          echo "id,date,client_id,card_id,amount,transaction_type,use_chip,merchant_id,merchant_city,merchant_state,zip,mcc,errors,isFraud,type" > data/transactions_data.csv
+          echo "7475332,2010-01-01 00:06:00,848,3915,46.41,Swipe Transaction,Swipe Transaction,13051,Harwood,MD,20776,5813,0,0,0" >> data/transactions_data.csv
+          echo "1,2010-01-01 00:07:00,825,1234,5000.0,Online Transaction,Online Transaction,99999,Online,CA,90001,1234,0,1,0" >> data/transactions_data.csv
+          
+          # 2. Création du fichier users_data.csv
+          # On utilise tes données pour le client 825
+          echo "id,current_age,retirement_age,birth_year,birth_month,gender,address,latitude,longitude,per_capita_income,yearly_income,total_debt,credit_score,num_credit_cards,City,State" > data/users_data.csv
+          echo "825,53,66,1966,11,Female,462 Rose Lane,34.15,-117.76,29278,59696,127613,787,5,Paris,France" >> data/users_data.csv
+          echo "848,40,65,1986,01,Male,Unknown,0.0,0.0,30000,60000,100000,700,3,Harwood,MD" >> data/users_data.csv
 
-      - name: Run Tests
+      - name: Run Tests with Coverage
         run: |
-          # La ligne suivante ajoute le dossier racine au PYTHONPATH. 
-          # C'est ce qui permet à GitHub de trouver 'src'.
-          export PYTHONPATH=$PYTHONPATH:.
-          pytest
+          # On s'assure que le dossier src est bien dans le chemin Python
+          export PYTHONPATH=$PYTHONPATH:$(pwd)/src
+          # Lancement de pytest avec génération du rapport de couverture
+          python -m pytest --cov=src --cov-report=term-missing
