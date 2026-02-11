@@ -13,19 +13,19 @@ def mock_all_services(monkeypatch):
     # On ajoute plusieurs lignes pour le client 825 et au moins une fraude
     mock_transactions = pd.DataFrame([
         {
-            "id": 0, "client_id": 825, "amount": -50.0,
+            "id": 0, "client_id": 825.0, "amount": -50.0,
             "use_chip": "Online Transaction", "type": "PAYMENT",
             "isFraud": 0, "oldbalanceOrg": 1000.0, "newbalanceOrig": 950.0,
             "transaction_type": "Online Transaction"
         },
         {
-            "id": 1, "client_id": 825, "amount": 5000.0,
+            "id": 1, "client_id": 825.0, "amount": 5000.0,
             "use_chip": "Online Transaction", "type": "TRANSFER",
             "isFraud": 1, "oldbalanceOrg": 5000.0, "newbalanceOrig": 0.0,
             "transaction_type": "Online Transaction"
         },
         {
-            "id": 2, "client_id": 999, "amount": -20.0,
+            "id": 2, "client_id": 999.0, "amount": -20.0,
             "use_chip": "Swipe Transaction", "type": "PAYMENT",
             "isFraud": 0, "oldbalanceOrg": 100.0, "newbalanceOrig": 80.0,
             "transaction_type": "Swipe Transaction"
@@ -39,23 +39,23 @@ def mock_all_services(monkeypatch):
     ])
 
     # 3. Injection des Mocks dans les différents services
-    # Service Transactions
+    # On mocke load_full_dataset pour tous les services qui l'utilisent
     monkeypatch.setattr(
         "banking_transaction_api.services.transaction_service.load_full_dataset",
         lambda: mock_transactions
     )
 
-    # Service Fraude
     monkeypatch.setattr(
         "banking_transaction_api.services.fraud_detection_service.load_full_dataset",
         lambda: mock_transactions
     )
 
-    # Service Client
     monkeypatch.setattr(
         "banking_transaction_api.services.customer_service.load_full_dataset",
         lambda: mock_transactions
     )
+
+    # On mocke load_user_data pour le service client
     monkeypatch.setattr(
         "banking_transaction_api.services.customer_service.load_user_data",
         lambda: mock_users
