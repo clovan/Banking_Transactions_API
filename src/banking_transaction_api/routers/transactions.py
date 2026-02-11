@@ -49,11 +49,24 @@ def list_transactions(
         "transactions": results
     }
 
+#====================Route 4 """""""""""""""""""
+@router.get("/types", summary="04. Liste des types de transactions disponibles")
+def get_transaction_types():
+    df = service.get_all()
+
+    if df.empty:
+        raise HTTPException(status_code=404, detail="Aucune donnée disponible.")
+
+    # Valeurs uniques triées
+    types = sorted(df["use_chip"].dropna().unique().tolist())
+
+    return {"types": types}
+
 
 # =================================================================
 # ROUTE 2 : DÉTAILS D'UNE TRANSACTION (GET)
 # =================================================================
-@router.get("/{transaction_id}:int", summary="02. Détails d'une transaction")
+@router.get("/{transaction_id}", summary="02. Détails d'une transaction")
 def get_transaction(
         transaction_id: int = Path(..., description="L'identifiant numérique de la transaction")
 ):
@@ -86,21 +99,6 @@ def search_transactions(criteria: TransactionSearchCriteria):
         "results": results
     }
 
-
-
-
-#====================Route 4 """""""""""""""""""
-@router.get("/types", summary="04. Liste des types de transactions disponibles")
-def get_transaction_types():
-    df = service.get_all()
-
-    if df.empty:
-        raise HTTPException(status_code=404, detail="Aucune donnée disponible.")
-
-    # Valeurs uniques triées
-    types = sorted(df["use_chip"].dropna().unique().tolist())
-
-    return {"types": types}
 
 #==================Route 5 =================
 @router.get("/recent", summary="05. Dernières transactions")

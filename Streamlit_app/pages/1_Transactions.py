@@ -1,67 +1,135 @@
 import streamlit as st
-from services.api_client import (
-    get_transactions, search_transactions, get_transaction_by_id, get_transaction_types
-)
+import pandas as pd
+from services.transactions_service import TransactionsAPI
 
-st.title("📄 Transactions")
+api = TransactionsAPI()
 
-tab1, tab2, tab3, tab4 = st.tabs(["Liste", "Recherche", "Types", "Par ID"])
+st.title("💳 Transactions bancaires")
 
+# Onglets
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    "Liste des transactions",
+    "Recherche par ID",
+    "Débits client",
+    "Crédits client",
+    "Filtrage avancé"
+])
+
+# ============================================================
+# TAB 1 : LISTE DES TRANSACTIONS
+# ============================================================
 with tab1:
-    st.subheader("Liste paginée")
-    page = st.number_input("Page", min_value=1, value=1)
-    limit = st.slider("Limite", 10, 100, 20)
+    st.subheader("📄 Liste des transactions")
+    limit = st.slider("Nombre de transactions à afficher", 10, 200, 50)
 
-    data = get_transactions(page=page, limit=limit)
-    st.dataframe(data["transactions"])
+    if st.button("Charger les transactions", key="load_transactions"):
+        data = api.list_transactions(limit=limit)
 
+        if "transactions" not in data:
+            st.error("Erreur lors du chargement des transactions.")
+        else:
+            df = pd.DataFrame(data["transactions"])
+
+            # 🔥 Fix Arrow : conversion locale uniquement
+            if "merchant_state" in df.columns:
+                df["merchant_state"] = df["merchant_state"].astype(str)
+
+            st.write(f"Total : {data['total_results']} transactions")
+            st.dataframe(df)
+
+
+# ============================================================
+# TAB 2 : RECHERCHE PAR ID
+# ============================================================
 with tab2:
-    st.subheader("Recherche multicritère")
+    st.subheader("🔍 Recherche par ID")
+    transaction_id = st.number_input("ID de la transaction", min_value=1, step=1)
 
-    type_ = st.text_input("Type de transaction (ex: chip, swipe, online)")
-    is_fraud = st.selectbox("Fraude", ["", 0, 1])
-    min_amount = st.number_input("Montant min", min_value=0.0)
-    max_amount = st.number_input("Montant max", min_value=0.0)
+    if st.button("Rechercher", key="search_by_id"):
+        result = api.get_by_id(transaction_id)
 
-    if st.button("Rechercher"):
-        results = search_transactions(
-            transaction_type=type_ or None,
-            isFraud=is_fraud if is_fraud != "" else None,
-            min_amount=min_amount if min_amount > 0 else None,
-            max_amount=max_amount if max_amount > 0 else None
-        )
+        if "detail" in result:
+            st.error(result["detail"])
+        else:
+            df = pd.DataFrame([result])
 
-        df = pd.DataFrame(results["transactions"])
+            if "merchant_state" in df.columns:
+                df["merchant_state"] = df["merchant_state"].astype(str)
 
-        # 🔥 Fix PyArrow: convertir toutes les colonnes object en string
-        for col in df.columns:
-            if df[col].dtype == "object":
-                df[col] = df[col].astype(str)
-
-        st.dataframe(df)
+            st.dataframe(df)
 
 
+# ============================================================
+# TAB 3 : DÉBITS CLIENT
+# ============================================================
 with tab3:
-    st.subheader("Types disponibles")
-    st.json(get_transaction_types())
+    st.subheader("💸 Débits client")
+    customer_id = st.number_input("ID client", min_value=1, step=1)
+
+    if st.button("Afficher les débits", key="show_debits"):
+        result = api.get_debits(customer_id)
+
+        if "detail" in result:
+            st.error(result["detail"])
+        else:
+            df = pd.DataFrame(result["transactions"])
+
+            if "merchant_state" in df.columns:
+                df["merchant_state"] = df["merchant_state"].astype(str)
+
+            st.dataframe(df)
 
 
-
+# ============================================================
+# TAB 4 : CRÉDITS CLIENT
+# ============================================================
 with tab4:
-    st.subheader("Rechercher une transaction par ID")
+    st.subheader("💰 Crédits client")
+    customer_id = st.number_input("ID client (crédits)", min_value=1, step=1)
 
-    tx_id = st.number_input("ID de la transaction", min_value=1, step=1)
+    if st.button("Afficher les crédits", key="show_credits"):
+        result = api.get_credits(customer_id)
 
-    if st.button("Chercher"):
-        tx = get_transaction_by_id(int(tx_id))
+        if "detail" in result:
+            st.error(result["detail"])
+        else:
+            df = pd.DataFrame(result["transactions"])
 
-        # On met le dict dans un DataFrame pour l’affichage
-        df = pd.DataFrame([tx])
+            if "merchant_state" in df.columns:
+                df["merchant_state"] = df["merchant_state"].astype(str)
 
-        # Fix PyArrow : convertir les colonnes object en string
-        for col in df.columns:
-            if df[col].dtype == "object":
-                df[col] = df[col].astype(str)
+            st.dataframe(df)
 
-        st.dataframe(df)
 
+# ============================================================
+# TAB 5 : FILTRAGE AVANCÉ
+# ============================================================
+with tab5:
+    st.subheader("🎯 Recherche multicritère")
+
+    types = api.get_types().get("types", [])
+    selected_type = st.selectbox("Type de transaction", [""] + types)
+
+    is_fraud = st.selectbox("Fraude ?", ["", 0, 1])
+
+    min_amount = st.number_input("Montant minimum", value=0.0)
+    max_amount = st.number_input("Montant maximum", value=0.0)
+
+    if st.button("Rechercher", key="advanced_search"):
+        payload = {
+            "type": selected_type or None,
+            "isFraud": is_fraud if is_fraud != "" else None,
+            "amount_range": [min_amount, max_amount]
+        }
+
+        result = api.search_advanced(payload)
+
+        if "detail" in result:
+            st.error(result["detail"])
+        else:
+            df = pd.DataFrame(result["results"])
+
+            if "merchant_state" in df.columns:
+                df["merchant_state"] = df["merchant_state"].astype(str)
+
+            st.dataframe(df)

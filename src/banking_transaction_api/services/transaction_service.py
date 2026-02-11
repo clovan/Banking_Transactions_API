@@ -4,11 +4,13 @@ class TransactionService:
     def __init__(self):
         self._df = None
 
+
     def get_all(self):
-        """Source de vérité unique pour toute l'API (Lazy loading)."""
+        #Source de vérité unique pour toute l'API (Lazy loading)
         if self._df is None:
             self._df = load_full_dataset()
-        return self._df
+        return self._df 
+
 
     def _rename_columns(self, data_list: list) -> list:
         """Substitue 'use_chip' par 'transaction_type' dans une liste de dictionnaires."""
