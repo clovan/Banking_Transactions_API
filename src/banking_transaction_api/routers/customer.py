@@ -24,6 +24,7 @@ def get_customers(
 # 2. ROUTE 18 : CLASSEMENT (Chemin fixe /top)
 # =================================================================
 # IMPORTANT : Cette route doit être AVANT /{customer_id}
+
 @router.get(
     "/top",
     summary="18. Top clients par volume",
@@ -34,6 +35,7 @@ def get_top_customers(
 ):
     """Identifie les clients ayant le plus grand nombre de transactions."""
     return service.get_top_customers(n)
+
 
 # =================================================================
 # 3. ROUTE 17 : DÉTAILS (Paramètre dynamique /{id})
@@ -50,3 +52,5 @@ def get_customer_profile(
     (volume, moyenne et statut de fraude).
     """
     return service.get_customer_profile(customer_id)
+
+

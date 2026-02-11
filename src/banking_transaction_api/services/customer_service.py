@@ -56,27 +56,6 @@ class CustomerService:
         }
 
     # =================================================================
-    # ROUTE 17 : PROFIL CLIENT SYNTHÉTIQUE
-    # =================================================================
-    def get_customer_profile(self, customer_id: int):
-        df_t = self.df_trans
-        if df_t is None or df_t.empty:
-            return {"id": str(customer_id), "error": "Données transactions indisponibles"}
-
-        user_transactions = df_t[df_t['client_id'].astype(str) == str(customer_id)]
-
-        count = len(user_transactions)
-        avg_amount = round(user_transactions['amount'].mean(), 2) if count > 0 else 0.0
-        is_fraudulent = any(user_transactions['isFraud'] == 1) if count > 0 else False
-
-        return {
-            "id": str(customer_id),
-            "transactions_count": count,
-            "avg_amount": avg_amount,
-            "fraudulent": is_fraudulent
-        }
-
-    # =================================================================
     # ROUTE 18 : TOP CLIENTS PAR VOLUME DE TRANSACTIONS
     # =================================================================
     def get_top_customers(self, n: int = 10):
@@ -103,3 +82,25 @@ class CustomerService:
             })
 
         return result
+
+    # =================================================================
+    # ROUTE 17 : PROFIL CLIENT SYNTHÉTIQUE
+    # =================================================================
+    def get_customer_profile(self, customer_id: int):
+        df_t = self.df_trans
+        if df_t is None or df_t.empty:
+            return {"id": str(customer_id), "error": "Données transactions indisponibles"}
+
+        user_transactions = df_t[df_t['client_id'].astype(str) == str(customer_id)]
+
+        count = len(user_transactions)
+        avg_amount = round(user_transactions['amount'].mean(), 2) if count > 0 else 0.0
+        is_fraudulent = any(user_transactions['isFraud'] == 1) if count > 0 else False
+
+        return {
+            "id": str(customer_id),
+            "transactions_count": count,
+            "avg_amount": avg_amount,
+            "fraudulent": is_fraudulent
+        }
+
