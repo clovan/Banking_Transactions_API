@@ -1,6 +1,14 @@
-# 🏦 Banking Transactions API
+#  Banking Transactions API
 
-## 🏦 Banking Transactions API  
+##  Auteurs
+
+- **Milaine MEYOUDOM**  
+- **Clovis MBENG**  
+- **Irmeline GUEVOU**  
+- **Amina SALIMI**
+
+
+##  Banking Transactions API  
 API REST complète permettant d’exposer, analyser et visualiser des données de transactions bancaires fictives.  
 Ce projet a été réalisé dans le cadre du **MBA ESG – Projet FastAPI**.
 
@@ -31,7 +39,7 @@ Banking Transaction API est solution complète d’analyse de transactions banca
 - tests unitaires + couverture (pytest --cov)
 
 
-## 📁 Architecture du projet
+##  Architecture du projet
 
 ```
 Banking_Transactions_API/
@@ -88,7 +96,7 @@ Banking_Transactions_API/
 
 ---
 
-## 🚀 Installation
+##  Installation
 
 ### 1. Cloner le projet
 
@@ -122,7 +130,7 @@ C’est la **commande magique**.
 
 ---
 
-## ▶️ Lancer l’API FastAPI
+## Lancer l’API FastAPI
 
 Depuis la racine du projet :
 
@@ -136,7 +144,7 @@ Documentation interactive :
 
 ---
 
-## 🖥️ Lancer l’application Streamlit
+##  Lancer l’application Streamlit
 
 Se placer dans le dossier Streamlit :
 
@@ -147,38 +155,38 @@ streamlit run app.py
 
 ---
 
-## 📡 Endpoints principaux
+##  Endpoints principaux
 
-### 🔹 Transactions
+###  Transactions
 - GET `/api/transactions`
 - GET `/api/transactions/{id}`
 - GET `/api/transactions/recent`
 - GET `/api/transactions/by-customer/{customer_id}`
 - GET `/api/transactions/to-customer/{customer_id}`
 
-### 🔹 Statistiques
+###  Statistiques
 - GET `/api/stats/overview`
 - GET `/api/stats/amount-distribution`
 - GET `/api/stats/by-type`
 - GET `/api/stats/daily`
 
-### 🔹 Fraude
+###  Fraude
 - GET `/api/fraud/summary`
 - GET `/api/fraud/by-type`
 - POST `/api/fraud/predict`
 
-### 🔹 Clients
+###  Clients
 - GET `/api/customers`
 - GET `/api/customers/{customer_id}`
 - GET `/api/customers/top`
 
-### 🔹 Système
+###  Système
 - GET `/api/system/health`
 - GET `/api/system/metadata`
 
 ---
 
-## 📊 Exemple de réponse — 10 dernières transactions
+##  Exemple de réponse — 10 dernières transactions
 
 ```json
 [
@@ -219,7 +227,7 @@ streamlit run app.py
 
 ---
 
-## 🧪 Tests unitaires
+##  Tests unitaires
 
 ### Installer les outils de test
 
@@ -243,7 +251,7 @@ pytest --cov=src/banking_transaction_api --cov-report=term-missing
 
 ---
 
-## 📦 Build du paquet Python
+##  Build du paquet Python
 Methode standard
 il faut installer
 
@@ -260,15 +268,8 @@ Les fichiers générés apparaissent dans `dist/`.
 
 ---
 
-## 👥 Auteurs
 
-- **Milaine MEYOUDOM**  
-- **Clovis MBENG**  
-- **Irmeline GUEVOU**  
-- **Amina SALIMI**
 
----
-
-## 📄 Licence
+##  Licence
 
 Projet académique — MBA ESG — non destiné à un usage commercial.
