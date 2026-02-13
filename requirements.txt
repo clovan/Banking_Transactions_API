@@ -1,7 +1,0 @@
-
-fastapi
-uvicorn
-pandas
-pytest
-httpx
-flake8
