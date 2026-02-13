@@ -22,7 +22,7 @@ def load_full_dataset():
     default_cols = ["id", "client_id", "amount", "use_chip", "isFraud", "type"]
 
     if not os.path.exists(csv_path):
-        # On retourne un DataFrame vide mais avec les colonnes pour éviter KeyError: 'id'
+        # On retourne un DataFrame vide avec les colonnes pour éviter KeyError: 'id'
         return pd.DataFrame(columns=default_cols)
 
     # --- Étape A : Lecture du CSV ---
@@ -40,7 +40,8 @@ def load_full_dataset():
                 fraud_data = json.load(f).get("target", {})
             fraud_series = pd.Series(fraud_data)
             # Mapping id -> label ('Yes'/'No') -> numérique (1/0)
-            df['isFraud'] = df['id'].astype(str).map(fraud_series).map({'Yes': 1, 'No': 0})
+            df['isFraud'] = df['id'].astype(str).map(
+                fraud_series).map({'Yes': 1, 'No': 0})
         except Exception:
             df['isFraud'] = 0
     else:

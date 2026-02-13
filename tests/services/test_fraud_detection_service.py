@@ -1,6 +1,8 @@
 import pytest
 import pandas as pd
-from banking_transaction_api.services.fraud_detection_service import FraudDetectionService
+from banking_transaction_api.services.fraud_detection_service import (
+    FraudDetectionService,
+)
 
 
 # =================================================================
@@ -12,9 +14,12 @@ class MockDataLoader:
         # On crée un jeu de données contrôlé pour valider la logique mathématique
         return pd.DataFrame([
             {"id": 1, "use_chip": "Online Transaction", "amount": 100.0, "isFraud": 0},
-            {"id": 2, "use_chip": "Online Transaction", "amount": 600.0, "isFraud": 0},  # Flagged (600 > 500)
-            {"id": 3, "use_chip": "Swipe Transaction", "amount": 50.0, "isFraud": 1},  # Fraude réelle
-            {"id": 4, "use_chip": "Online Transaction", "amount": 1000.0, "isFraud": 1},  # Flagged + Fraude
+            {"id": 2, "use_chip": "Online Transaction",
+                "amount": 600.0, "isFraud": 0},  # Flagged (600 > 500)
+            {"id": 3, "use_chip": "Swipe Transaction",
+                "amount": 50.0, "isFraud": 1},  # Fraude réelle
+            {"id": 4, "use_chip": "Online Transaction",
+                "amount": 1000.0, "isFraud": 1},  # Flagged + Fraude
         ])
 
 
@@ -62,7 +67,8 @@ def test_fraud_by_type_logic(fraud_service):
     """Vérifie la répartition des fraudes par type."""
     fraud_types = fraud_service.get_fraud_by_type()
 
-    # Dans le mock, il y a une fraude en 'Swipe Transaction' et une en 'Online Transaction'
+    # Dans le mock, il y a une fraude en 'Swipe Transaction'
+    # et une en 'Online Transaction'
     assert fraud_types["Swipe Transaction"] == 1
     assert fraud_types["Online Transaction"] == 1
 

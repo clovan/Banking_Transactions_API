@@ -15,7 +15,8 @@ def test_route_9_stats_overview():
     stats = response.json()
 
     # Vérification des clés obligatoires
-    required_keys = ["total_transactions", "fraud_rate", "avg_amount", "most_common_type"]
+    required_keys = ["total_transactions",
+                     "fraud_rate", "avg_amount", "most_common_type"]
     for key in required_keys:
         assert key in stats
 

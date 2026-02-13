@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 class StatsService:
     def __init__(self, transaction_service):
         """Injecte le service de transaction pour accéder au DataFrame partagé."""
@@ -23,20 +24,33 @@ class StatsService:
         if df is None or df.empty:
             return None
 
+        if "use_chip" in df.columns:
+            most_common_type = df["use_chip"].mode()[0]
+        else:
+            most_common_type = "N/A"
+
         return {
             "total_transactions": int(len(df)),
             "fraud_rate": float(round(df["isFraud"].mean(), 5)),
             "avg_amount": float(round(df["amount"].mean(), 2)),
-            "most_common_type": df["use_chip"].mode()[0] if "use_chip" in df.columns else "N/A"
+            "most_common_type": most_common_type,
         }
 
     # =================================================================
     # ROUTE 10 : DISTRIBUTION DES MONTANTS (BINS)
     # =================================================================
     def get_amount_distribution(self, custom_bins: list = None):
-        """
-        Génère la distribution des montants.
+        """Génère la distribution des montants.
         Par défaut : [0, 100, 500, 1000, 5000]
+
+        Parameters
+        ----------
+        custom_bins: list :
+             (Default value = None)
+
+        Returns
+        -------
+
         """
         df = self._get_cleaned_df()
         if df is None or df.empty:
@@ -50,7 +64,7 @@ class StatsService:
             bins = sorted(list(set([float(b) for b in custom_bins])))
 
         # 2. Création des labels dynamiques (ex: "0-100")
-        labels = [f"{int(bins[i])}-{int(bins[i+1])}" for i in range(len(bins)-1)]
+        labels = [f"{int(bins[i])}-{int(bins[i + 1])}" for i in range(len(bins) - 1)]
 
         # 3. Calcul de la distribution
         # include_lowest=True permet d'inclure la valeur 0 dans le premier palier
@@ -71,12 +85,14 @@ class StatsService:
     # ROUTE 11 : STATISTIQUES PAR TYPE
     # =================================================================
     def get_stats_by_type(self):
+        """ """
         df = self._get_cleaned_df()
         if df is None or df.empty:
             return None
 
         # Agrégation par type de transaction
-        stats_type = df.groupby('use_chip')['amount'].agg(['count', 'mean']).reset_index()
+        stats_type = df.groupby('use_chip')['amount'].agg(
+            ['count', 'mean']).reset_index()
 
         result = []
         for _, row in stats_type.iterrows():
@@ -87,7 +103,7 @@ class StatsService:
             })
         return result
 
-    #========Route 12==============
+    # ========Route 12==============
     def get_daily_stats(self):
         """Retourne le nombre de transactions par jour."""
         df = self.transaction_service.get_all()

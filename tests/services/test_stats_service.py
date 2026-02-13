@@ -12,10 +12,14 @@ class MockTransactionService:
 
     def get_all(self):
         return pd.DataFrame([
-            {"id": 1, "use_chip": "Chip", "amount": -100.0, "isFraud": 0, "date": "2025-01-01"},
-            {"id": 2, "use_chip": "Online", "amount": 200.0, "isFraud": 1, "date": "2025-01-01"},
-            {"id": 3, "use_chip": "Chip", "amount": -300.0, "isFraud": 0, "date": "2025-01-02"},
-            {"id": 4, "use_chip": "Online", "amount": 400.0, "isFraud": 0, "date": "2025-01-02"}
+            {"id": 1, "use_chip": "Chip", "amount":
+                - 100.0, "isFraud": 0, "date": "2025-01-01"},
+            {"id": 2, "use_chip": "Online", "amount": 200.0,
+                "isFraud": 1, "date": "2025-01-01"},
+            {"id": 3, "use_chip": "Chip", "amount":
+                - 300.0, "isFraud": 0, "date": "2025-01-02"},
+            {"id": 4, "use_chip": "Online", "amount": 400.0,
+                "isFraud": 0, "date": "2025-01-02"}
         ])
 
 

@@ -8,10 +8,12 @@ router = APIRouter(prefix="/api/system", tags=["08. Système"])
 tx_service = TransactionService()
 system_service = SystemService(tx_service)
 
+
 @router.get("/health", summary="19. État de santé de l'API")
 def get_health():
     """Vérifie l'état de santé, le ping et l'uptime."""
     return system_service.get_health_status()
+
 
 @router.get("/metadata", summary="20. Métadonnées du service")
 def get_metadata():

@@ -28,6 +28,7 @@ dependencies = [
     "pandas",
     "python-dotenv",
     "numpy",
+    "streamlit>=1.54.0",
 ]
 
 # Dépendances de développement et tests (Qualité logicielle)

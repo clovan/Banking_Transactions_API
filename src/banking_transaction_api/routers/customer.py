@@ -8,6 +8,8 @@ service = CustomerService()
 # =================================================================
 # 1. ROUTE 16 : LISTE GÉNÉRALE (Racine)
 # =================================================================
+
+
 @router.get(
     "/",
     summary="16. Liste paginée des clients",
@@ -17,13 +19,32 @@ def get_customers(
     page: int = Query(1, ge=1, description="Numéro de la page"),
     size: int = Query(10, ge=1, le=100, description="Clients par page")
 ):
-    """Récupère la liste globale des clients avec pagination."""
+    """Récupère la liste globale des clients avec pagination.
+
+    Parameters
+    ----------
+    page: int :
+         (Default value = Query(1)
+    ge :
+         (Default value = 1)
+    description :
+         (Default value = "Clients par page"))
+    size: int :
+         (Default value = Query(10)
+    le :
+         (Default value = 100)
+
+    Returns
+    -------
+
+    """
     return service.get_paginated_customers(page, size)
 
 # =================================================================
 # 2. ROUTE 18 : CLASSEMENT (Chemin fixe /top)
 # =================================================================
 # IMPORTANT : Cette route doit être AVANT /{customer_id}
+
 
 @router.get(
     "/top",
@@ -33,7 +54,23 @@ def get_customers(
 def get_top_customers(
     n: int = Query(10, ge=1, le=100, description="Nombre de clients (Top N)")
 ):
-    """Identifie les clients ayant le plus grand nombre de transactions."""
+    """Identifie les clients ayant le plus grand nombre de transactions.
+
+    Parameters
+    ----------
+    n: int :
+         (Default value = Query(10)
+    ge :
+         (Default value = 1)
+    le :
+         (Default value = 100)
+    description :
+         (Default value = "Nombre de clients (Top N)"))
+
+    Returns
+    -------
+
+    """
     return service.get_top_customers(n)
 
 
@@ -47,10 +84,20 @@ def get_top_customers(
 def get_customer_profile(
     customer_id: int = Path(..., ge=0, description="ID numérique du client")
 ):
-    """
-    Croise les fichiers CSV et JSON pour générer un profil d'activité
+    """Croise les fichiers CSV et JSON pour générer un profil d'activité
     (volume, moyenne et statut de fraude).
+
+    Parameters
+    ----------
+    customer_id: int :
+         (Default value = Path(...)
+    ge :
+         (Default value = 0)
+    description :
+         (Default value = "ID numérique du client"))
+
+    Returns
+    -------
+
     """
     return service.get_customer_profile(customer_id)
-
-
